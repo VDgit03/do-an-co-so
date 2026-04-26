@@ -1,5 +1,5 @@
 import express from "express";
-
+app.use(express.static("public"));
 const app = express();
 
 app.get("/", (req, res) => {
