@@ -1,0 +1,33 @@
+.name{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.strength-wrap { 
+    margin-top: 6px; 
+    display: flex; 
+    gap: 4px; 
+}
+.s-seg { 
+    flex: 1; 
+    height: 3px; 
+    border-radius: 2px; 
+    background: rgba(255,255,255,0.1); 
+    transition: background 0.3s; 
+}
+
+.strength-label { 
+    font-size: 10px; 
+    color: var(--muted); 
+    margin-top: 4px; 
+}
+.policy{
+    font-size: 11px; 
+    color: rgba(140,170,200,0.5); 
+    margin-top: 14px; 
+    text-align: center; 
+    line-height: 1.6; 
+}
+.policy a { 
+    color: var(--muted); 
+    cursor: pointer; 
+}
+.policy a:hover { 
+    color: var(--accent); 
+}
