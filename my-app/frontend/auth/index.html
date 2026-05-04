@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        />
+        <link rel="stylesheet" href="./css/index.css" />
+        <link rel="stylesheet" href="./css/login.css" />
+        <link rel="stylesheet" href="./css/register.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=DM+Serif+Display&display=swap"
+            rel="stylesheet"
+        />
+        <title>MoneyTrack-Đăng nhập</title>
+    </head>
+    <body>
+        <div class="bg-deco"></div>
+        <div class="bg-grid"></div>
+        <div class="float-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <main>
+            <section class="left">
+                <div class="header">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <span class="logo-name">MoneyTrack</span>
+                    </div>
+                    <p class="tagline">
+                        Kiểm soát tài chính <br />
+                        <em>thông minh</em>
+                    </p>
+                    <p>
+                        Theo dõi thu chi, phân tích xu hướng và đạt mục tiêu tài
+                        chính — tất cả trong một nơi.
+                    </p>
+                </div>
+                <ul class="left-mid">
+                    <li>
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div class="feature">
+                            <strong>Theo dõi thu chi</strong>
+                            <span>
+                                Ghi lại mọi khoản thu nhập và chi tiêu theo danh
+                                mục
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-chart-simple"></i>
+                        <div class="feature">
+                            <strong>Báo cáo trực quan</strong>
+                            <span>
+                                Biểu đồ phân tích tài chính theo tuần, tháng,
+                                năm
+                            </span>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-piggy-bank"></i>
+                        <div class="feature">
+                            <strong>Mục tiêu tiết kiệm</strong>
+                            <span
+                                >Đặt vào theo dõi tiến độ tiết kiệm từng
+                                tháng</span
+                            >
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-credit-card"></i>
+                        <div class="feature">
+                            <strong>Quản lý ví thông minh</strong>
+                            <span
+                                >Nhiều ví, nhiều tài khoản trong một giao
+                                diện</span
+                            >
+                        </div>
+                    </li>
+                </ul>
+                <div class="left-footer">
+                    © 2026 MoneyTrack. All rights reserved.
+                </div>
+            </section>
+            <article class="right">
+                <div class="tab">
+                    <button id="tab-login" onclick="switchTab('login')">
+                        Đăng nhập
+                    </button>
+                    <button id="tab-register" onclick="switchTab('register')">
+                        Đăng ký
+                    </button>
+                </div>
+                <div id="content"></div>
+            </article>
+        </main>
+    </body>
+    <script src="function_auth.js"></script>
+</html>
