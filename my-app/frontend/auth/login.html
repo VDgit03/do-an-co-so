@@ -18,6 +18,9 @@
             <div class="input">
                 <input type="password" placeholder="••••••••" name="pw" />
                 <i class="fa-solid fa-lock"></i>
+                <span class="eye" onclick="togglePassword(this)">
+                    <i class="fa-regular fa-eye"></i>
+                </span>
             </div>
         </div>
         <div class="link">
@@ -26,7 +29,9 @@
             </label>
             <button type="button" class="forget">Quên mật khẩu</button>
         </div>
-        <button type="submit" class="login">Đăng nhập</button>
+        <button type="submit" onclick="handleLogin()" class="login">
+            Đăng nhập
+        </button>
         <div class="divider">
             <div class="divider-line"></div>
             <div class="divider-text">HOẶC</div>
