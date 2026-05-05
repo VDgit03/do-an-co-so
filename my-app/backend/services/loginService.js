@@ -23,7 +23,7 @@ export const loginService = async (email, password) => {
       email: user.email,
     },
     process.env.JWT_SECRET, 
-    { expiresIn: "1d" }
+    { expiresIn: "30s" }
   );
 
   // 4. trả về

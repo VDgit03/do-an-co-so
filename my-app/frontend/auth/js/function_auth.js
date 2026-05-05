@@ -15,14 +15,17 @@ function togglePassword(el) {
 function switchTab(tab) {
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
     document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-    // chọn file
+
     let file = tab === 'login' ? 'login.html' : 'register.html';
 
-    // load form
     fetch(file)
         .then(res => res.text())
         .then(data => {
             document.getElementById('content').innerHTML = data;
+
+            if (tab === "login") {
+                setTimeout(initGoogle, 0); 
+            }
         });
 }
 // load mặc định
@@ -71,7 +74,9 @@ async function handleRegister() {
     const data = await res.json();
     alert(data.message);
 }
+
 async function handleLogin() {
+    const form = document.getElementById("sec-login");
     const email = document.querySelector('[name="email"]').value.trim();
     const password = document.querySelector('[name="pw"]').value.trim();
 
@@ -93,5 +98,39 @@ async function handleLogin() {
     window.location.href = "../custom/dashboard.html";
     } else {
         alert(data.message);
+    }
+}
+function initGoogle() {
+    if (!window.google) return;
+
+    google.accounts.id.initialize({
+        client_id: "154491749202-4iinbu06d337isv8gksj44nidvfg7ggo.apps.googleusercontent.com",
+        callback: handleGoogleLogin
+    });
+
+    const btn = document.getElementById("google-btn");
+    if (!btn) return;
+
+    google.accounts.id.renderButton(btn, {
+        theme: "outline",
+        size: "large"
+    });
+}
+async function handleGoogleLogin(response) {
+    console.log("Google response:", response);
+    const res = await fetch("http://localhost:3000/api/auth/google", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            token: response.credential
+        })
+    });
+    const data = await res.json();
+
+    if (data.token) {
+        localStorage.setItem("token", data.token);
+        window.location.href = "../custom/dashboard.html";
     }
 }
