@@ -38,6 +38,9 @@
                 oninput="checkStrength(this.value)"
             />
             <i class="fa-solid fa-lock"></i>
+            <span class="eye" onclick="togglePassword(this)">
+                <i class="fa-regular fa-eye"></i>
+            </span>
         </div>
         <div class="strength-wrap" id="strength-bars">
             <div class="s-seg" id="s1"></div>
@@ -52,9 +55,14 @@
         <div class="input">
             <input type="password" placeholder="••••••••" name="confirm" />
             <i class="fa-solid fa-lock"></i>
+            <span class="eye" onclick="togglePassword(this)">
+                <i class="fa-regular fa-eye"></i>
+            </span>
         </div>
     </div>
-    <button type="submit" class="login">Tạo tài khoản</button>
+    <button type="submit" onclick="handleRegister()" class="login">
+        Tạo tài khoản
+    </button>
     <div class="policy">
         Bằng cách đăng ký, bạn đồng ý với <a>Điều khoản dịch vụ</a> và
         <a>Chính sách bảo mật</a> của chúng tôi.
