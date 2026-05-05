@@ -60,6 +60,21 @@
 .field input:focus + i, .input-wrap:focus-within i { 
     stroke: var(--accent);
 }
+.eye{
+    position: absolute;
+    right: 12px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    padding: 2px;
+    padding-right: 30px;
+    color: var(--muted);
+}
+.eye i{
+    width: 15px; 
+    height: 15px; 
+    stroke: currentColor;
+}
 .link{
     display: flex; 
     align-items: center; 
