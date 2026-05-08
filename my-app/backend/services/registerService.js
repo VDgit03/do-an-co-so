@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
-import db from "../config/db.js";
+
+import {findUserByEmail, createUser} from "../models/authModel.js";
 
 export const registerService = async ({
   first_name,
@@ -8,30 +9,26 @@ export const registerService = async ({
   password,
 }) => {
 
-  // check email tồn tại
-  const [rows] = await db.execute(
-    "SELECT * FROM users WHERE email = ?",
-    [email]
-  );
-
-  if (rows.length > 0) {
+  // check email
+  const existingUser = await findUserByEmail(email);
+  if (existingUser) {
     throw new Error("Email đã tồn tại");
   }
 
   // hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // insert DB
-  const [result] = await db.execute(
-    "INSERT INTO users (first_name, last_name, email, password) VALUES (?, ?, ?, ?)",
-    [first_name, last_name, email, hashedPassword]
-  );
-
-  // return user
+  // create user
+  const result = await createUser({
+    first_name,
+    last_name,
+    email,
+    password: hashedPassword
+  });
   return {
     id: result.insertId,
     first_name,
     last_name,
-    email,
+    email
   };
 };

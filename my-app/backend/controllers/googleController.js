@@ -11,7 +11,7 @@ export const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
 
-    console.log("👉 GOOGLE TOKEN:", token);
+    console.log("GOOGLE TOKEN:", token);
 
     const ticket = await client.verifyIdToken({
       idToken: token,
@@ -20,7 +20,7 @@ export const googleLogin = async (req, res) => {
 
     const payload = ticket.getPayload();
 
-    console.log("👉 GOOGLE PAYLOAD:", payload);
+    console.log("GOOGLE PAYLOAD:", payload);
 
     const email = payload.email;
     const first_name = payload.given_name || "";
@@ -47,7 +47,7 @@ export const googleLogin = async (req, res) => {
     const appToken = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1s" }
+      { expiresIn: "1d" }
     );
 
     return res.json({
