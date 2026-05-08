@@ -93,9 +93,9 @@ async function handleLogin() {
     if (data.token) {
     localStorage.setItem("token", data.token);
 
-    alert("Login thành công!");
+    alert("Đăng nhập thành công!");
 
-    window.location.href = "../custom/dashboard.html";
+    window.location.href = "../custom/home/home.html";
     } else {
         alert(data.message);
     }
@@ -104,7 +104,7 @@ function initGoogle() {
     if (!window.google) return;
 
     google.accounts.id.initialize({
-        client_id: "154491749202-4iinbu06d337isv8gksj44nidvfg7ggo.apps.googleusercontent.com",
+        client_id: "72957436394-072ebp2pnfbobbikh3hgb4a4i8fsc7sn.apps.googleusercontent.com",
         callback: handleGoogleLogin
     });
 
@@ -131,6 +131,6 @@ async function handleGoogleLogin(response) {
 
     if (data.token) {
         localStorage.setItem("token", data.token);
-        window.location.href = "../custom/dashboard.html";
+        window.location.href = "../custom/home/home.html";
     }
 }

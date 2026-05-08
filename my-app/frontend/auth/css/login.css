@@ -127,7 +127,9 @@
     transform: scale(0.99);
 }
 .divider {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; 
+    align-items: center; 
+    gap: 12px;
     margin-bottom: 16px;
 }
 .divider-line { 

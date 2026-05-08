@@ -1,0 +1,55 @@
+<aside id="nav" class="sidebar">
+    <div class="logo">
+        <h1>Money Track</h1>
+        <p>Quản lí chi tiêu cá nhân</p>
+    </div>
+    <nav class="nav">
+        <div class="nav-first">
+            <h3 class="nav-title">Chính</h3>
+            <ul>
+                <li>
+                    <a href=""><i class="fa-solid fa-house"></i>Trang chủ</a>
+                </li>
+                <li>
+                    <a href=""
+                        ><i class="fa-regular fa-calendar"></i>Lịch sử giao
+                        dịch</a
+                    >
+                </li>
+                <li>
+                    <a href=""
+                        ><i class="fa-solid fa-chart-column"></i>Báo cáo</a
+                    >
+                </li>
+            </ul>
+        </div>
+        <div class="nav-second">
+            <h3 class="nav-title">Quản lý</h3>
+            <ul>
+                <li>
+                    <a href=""><i class="fa-solid fa-bolt"></i>Tiết kiệm</a>
+                </li>
+                <li class="dropdown">
+                    <div class="dropdown-btn" onclick="toggleWalletMenu()">
+                        <div class="wallet">
+                            <i class="fa-regular fa-credit-card"></i>
+                            <span>Ví của tôi</span>
+                        </div>
+                        <i class="fa-solid fa-chevron-right arrow"></i>
+                    </div>
+
+                    <div class="submenu" id="walletMenu">
+                        <a href="#">Thu nhập</a>
+                        <a href="#">Tiết kiệm</a>
+                    </div>
+                </li>
+                <li>
+                    <a href=""
+                        ><i class="fa-regular fa-clipboard"></i>Danh mục</a
+                    >
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="user"></div>
+</aside>
