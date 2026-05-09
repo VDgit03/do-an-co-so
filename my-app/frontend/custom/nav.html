@@ -51,5 +51,24 @@
             </ul>
         </div>
     </nav>
-    <div class="user"></div>
+    <div class="user" onclick="toggleUserMenu()">
+        <i class="fa-regular fa-user"></i>
+
+        <div class="info">
+            <div id="username"></div>
+            <p>Tài khoản cá nhân</p>
+        </div>
+
+        <div class="user-menu" id="userMenu">
+            <button onclick="changePassword()">
+                <i class="fa-solid fa-lock"></i>
+                Đổi mật khẩu
+            </button>
+
+            <button onclick="logout()">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                Đăng xuất
+            </button>
+        </div>
+    </div>
 </aside>

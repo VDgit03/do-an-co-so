@@ -1,4 +1,4 @@
-
+// xem mk
 function togglePassword(el) {
     const wrapper = el.closest(".input");
     const pw = wrapper.querySelector("input");
@@ -12,6 +12,8 @@ function togglePassword(el) {
         icon.classList.replace("fa-eye-slash", "fa-eye");
     }
 }
+
+// đổi tab
 function switchTab(tab) {
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
     document.getElementById('tab-register').classList.toggle('active', tab === 'register');
@@ -31,6 +33,7 @@ function switchTab(tab) {
 // load mặc định
 window.onload = () => switchTab('login');
 
+// kiểm tra mk
 function checkStrength(val) {
     const segs = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
     const label = document.getElementById('strength-text');
@@ -48,6 +51,7 @@ function checkStrength(val) {
     label.style.color = colors[Math.min(score-1,3)];
   }
 
+// đki
 async function handleRegister() {
     const form = document.getElementById("sec-register");
 
@@ -75,11 +79,11 @@ async function handleRegister() {
     alert(data.message);
 }
 
+// đăng nhập
 async function handleLogin() {
     const form = document.getElementById("sec-login");
     const email = document.querySelector('[name="email"]').value.trim();
     const password = document.querySelector('[name="pw"]').value.trim();
-
     const res = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
@@ -87,50 +91,62 @@ async function handleLogin() {
         },
         body: JSON.stringify({ email, password }),
     });
-
     const data = await res.json();
-
     if (data.token) {
     localStorage.setItem("token", data.token);
-
+    localStorage.setItem(
+        "userId",
+        data.user.id
+    );
     alert("Đăng nhập thành công!");
-
-    window.location.href = "../custom/home/home.html";
+    window.location.href =
+        "../custom/home/home.html";
     } else {
         alert(data.message);
     }
 }
+
+// tạo client id
 function initGoogle() {
     if (!window.google) return;
-
     google.accounts.id.initialize({
         client_id: "72957436394-072ebp2pnfbobbikh3hgb4a4i8fsc7sn.apps.googleusercontent.com",
         callback: handleGoogleLogin
     });
-
     const btn = document.getElementById("google-btn");
     if (!btn) return;
-
     google.accounts.id.renderButton(btn, {
         theme: "outline",
         size: "large"
     });
 }
-async function handleGoogleLogin(response) {
-    console.log("Google response:", response);
-    const res = await fetch("http://localhost:3000/api/auth/google", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            token: response.credential
-        })
-    });
-    const data = await res.json();
 
+// đăng nhập = gg
+async function handleGoogleLogin(response) {
+    const res = await fetch(
+        "http://localhost:3000/api/auth/google",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: response.credential
+            })
+        }
+    );
+    const data = await res.json();
+    console.log(data);
     if (data.token) {
-        localStorage.setItem("token", data.token);
-        window.location.href = "../custom/home/home.html";
+        localStorage.setItem(
+            "token",
+            data.token
+        );
+        localStorage.setItem(
+            "userId",
+            data.user.id
+        );
+        window.location.href =
+            "../custom/home/home.html";
     }
 }
