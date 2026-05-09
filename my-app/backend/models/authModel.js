@@ -23,3 +23,19 @@ export const createUser = async ({
   );
   return result.insertId;
 };
+
+export const findUserById = async (id) => {
+
+    const [rows] = await pool.query(
+        `
+        SELECT
+            first_name,
+            last_name
+        FROM users
+        WHERE id = ?
+        `,
+        [id]
+    );
+
+    return rows[0];
+};

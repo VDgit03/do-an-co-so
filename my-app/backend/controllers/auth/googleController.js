@@ -1,5 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
-import db from "../config/db.js";
+import db from "../../config/db.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -11,7 +11,6 @@ export const googleLogin = async (req, res) => {
   try {
     const { token } = req.body;
 
-    console.log("GOOGLE TOKEN:", token);
 
     const ticket = await client.verifyIdToken({
       idToken: token,
@@ -20,7 +19,6 @@ export const googleLogin = async (req, res) => {
 
     const payload = ticket.getPayload();
 
-    console.log("GOOGLE PAYLOAD:", payload);
 
     const email = payload.email;
     const first_name = payload.given_name || "";
