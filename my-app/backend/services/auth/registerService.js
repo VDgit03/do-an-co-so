@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
-
-import {findUserByEmail, createUser} from "../models/authModel.js";
+import {findUserByEmail, createUser} from "../../models/authModel.js";
 
 export const registerService = async ({
   first_name,

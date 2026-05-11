@@ -1,4 +1,4 @@
-import { findUserByEmail } from "../models/authModel.js";
+import { findUserByEmail } from "../../models/authModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 

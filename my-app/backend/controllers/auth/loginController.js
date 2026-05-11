@@ -1,4 +1,4 @@
-import { loginService } from "../../services/loginService.js";
+import { loginService } from "../../services/auth/loginService.js";
 
 export const login = async (req, res) => {
   try {
@@ -12,7 +12,6 @@ export const login = async (req, res) => {
     }
 
     const result = await loginService(email, password);
-
     return res.json({
       message: "Đăng nhập thành công",
       token: result.token,

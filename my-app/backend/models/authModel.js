@@ -24,18 +24,37 @@ export const createUser = async ({
   return result.insertId;
 };
 
-export const findUserById = async (id) => {
-
+export const findUserById = async (
+    id
+) => {
     const [rows] = await pool.query(
         `
         SELECT
             first_name,
-            last_name
+            last_name,
+            password,
+            last_change
         FROM users
         WHERE id = ?
         `,
         [id]
     );
-
     return rows[0];
+}; 
+
+export const updatePassword = async (
+    id,
+    hashedPassword
+) => {
+
+    await pool.query(
+        `
+        UPDATE users
+        SET
+            password = ?,
+            last_change = NOW()
+        WHERE id = ?
+        `,
+        [hashedPassword, id]
+    );
 };
