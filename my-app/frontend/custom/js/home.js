@@ -118,20 +118,30 @@ function changePassword() {
 async function handleChangePassword() {
     try {
         const oldPassword = document.getElementById("oldPassword").value;
-        const newPassword = document.getElementById("newPassword") .value;
+        const newPassword = document.getElementById("newPassword").value;
         const confirmPassword = document.getElementById("confirmPassword").value;
-
         const userId = localStorage.getItem("userId");
 
-        // validate frontend
+        // validate
         if (!oldPassword || !newPassword || !confirmPassword) {
-            alert("Vui lòng nhập đầy đủ");
+            alert(
+                "Vui lòng nhập đầy đủ"
+            );
             return;
         }
-        if (newPassword !== confirmPassword) {
-            alert("Mật khẩu xác nhận không khớp");
+
+        // confirm password
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
+            alert(
+                "Mật khẩu xác nhận không khớp"
+            );
             return;
         }
+
+        // request
         const res = await fetch(
             "http://localhost:3000/api/auth/changepw",
             {
@@ -149,13 +159,30 @@ async function handleChangePassword() {
             }
         );
         const data = await res.json();
-        alert(data.message);
 
-        // thành công
-        if (res.ok) {
-            window.location.href =
-                "./home.html";
+        // account google
+        if (data.isGoogle) {
+            document.querySelector(".form").innerHTML =
+            `
+            <h2>
+                Tài khoản Google
+            </h2>
+            <p>
+                Không thể đổi mật khẩu
+            </p>
+            `;
+            return;
         }
+
+        // lỗi
+        if (!res.ok) {
+            alert(data.message);
+            return;
+        }
+
+        // success
+        alert(data.message);
+        window.location.href = "./home.html";
     } catch (err) {
         console.error(err);
     }

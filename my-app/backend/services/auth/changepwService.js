@@ -14,7 +14,9 @@ export const changePasswordService = async (
     if (!user) {
         throw new Error("User không tồn tại");
     }
-
+    if (!user.password) {
+        throw new Error("Tài khoản Google không thể đổi mật khẩu");
+    }
     // kiểm tra mật khẩu cũ
     const isMatch = await bcrypt.compare(
             oldPassword,

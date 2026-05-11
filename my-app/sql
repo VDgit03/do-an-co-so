@@ -1,5 +1,4 @@
 CREATE DATABASE qlct;
-
 USE qlct;
 
 CREATE TABLE users (
@@ -8,5 +7,6 @@ CREATE TABLE users (
     last_name VARCHAR(50),
     email VARCHAR(100) UNIQUE,
     password VARCHAR(255),
+    last_change DATETIME 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

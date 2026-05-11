@@ -46,7 +46,6 @@ export const updatePassword = async (
     id,
     hashedPassword
 ) => {
-
     await pool.query(
         `
         UPDATE users
