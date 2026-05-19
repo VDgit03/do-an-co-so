@@ -1,12 +1,80 @@
 CREATE DATABASE qlct;
 USE qlct;
 
+-- USERS
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(100) UNIQUE,
     password VARCHAR(255),
-    last_change DATETIME 
+    last_change DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CATEGORIES
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    icon VARCHAR(50),
+    bg_color VARCHAR(30),
+    fg_color VARCHAR(30),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+-- WALLETS
+CREATE TABLE wallets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    type ENUM('income', 'saving') NOT NULL,
+    balance DECIMAL(15,2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE
+);
+
+-- TRANSACTION HISTORY
+CREATE TABLE transaction(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    wallet_id INT NOT NULL,
+    category_id INT NULL,
+    type ENUM('income', 'expense', 'saving') NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    title VARCHAR(255),
+    note TEXT,
+    transaction_date DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (wallet_id)
+        REFERENCES wallets(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (category_id)
+        REFERENCES categories(id)
+        ON DELETE SET NULL
+);
+
+-- BUDGETS
+CREATE TABLE budgets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    category_id INT NOT NULL,
+    amount DECIMAL(15,2) NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (category_id)
+        REFERENCES categories(id)
+        ON DELETE CASCADE
 );
