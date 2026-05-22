@@ -1,11 +1,11 @@
 import pool from "../../config/db.js";
 
+// lấy          
 export const getAllCategories = async (
     userId,
     month,
     year
 ) => {
-
     const [rows] = await pool.query(
         `
         SELECT
@@ -28,12 +28,11 @@ export const getAllCategories = async (
         `,
         [userId, month, year]
     );
-
     return rows;
 };  
 
+// thêm
 export const addCategory = async (data) => {
-
     const {
         user_id,
         name,
@@ -44,7 +43,6 @@ export const addCategory = async (data) => {
         month,
         year
     } = data;
-
     const [result] = await pool.query(
         `
         INSERT INTO categories
@@ -67,7 +65,6 @@ export const addCategory = async (data) => {
     );
 
     const categoryId = result.insertId;
-
     await pool.query(
         `
         INSERT INTO budgets
@@ -88,12 +85,12 @@ export const addCategory = async (data) => {
             year
         ]
     );
-
     return {
         message: "Created"
     };
 };
 
+// update
 export const editCategory = async (
     id,
     data

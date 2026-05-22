@@ -1,7 +1,7 @@
 import pool from "../../config/db.js";
 
+// lấy
 export const getBudgetsService = async () => {
-
     const [rows] = await pool.query(`
         SELECT
             budgets.id,
@@ -21,10 +21,10 @@ export const getBudgetsService = async () => {
 
         ORDER BY budgets.id DESC
     `);
-
     return rows;
 };
 
+// thêm
 export const addBudgetService = async (
     user_id,
     category_id,
@@ -32,7 +32,6 @@ export const addBudgetService = async (
     month,
     year
 ) => {
-
     await pool.query(`
         INSERT INTO budgets
         (
@@ -53,11 +52,11 @@ export const addBudgetService = async (
 
 };
 
+// update
 export const updateBudgetService = async (
     id,
     amount
 ) => {
-
     await pool.query(`
         UPDATE budgets
         SET amount = ?
@@ -69,8 +68,8 @@ export const updateBudgetService = async (
 
 };
 
+// xóa
 export const deleteBudgetService = async (id) => {
-
     await pool.query(`
         DELETE FROM budgets
         WHERE id = ?
