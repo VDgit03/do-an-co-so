@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link rel="stylesheet" href="../css/list.css" />
+        <link rel="stylesheet" href="../css/nav.css" />
+        <title>Money Track</title>
+    </head>
+    <body>
+        <div class="list">
+            <div id="nav-container"></div>
+            <main>
+                <header class="topbar">
+                    <div class="title">
+                        <h2>Danh mục</h2>
+                        <div id="current-date"></div>
+                    </div>
+                    <div class="right">
+                        <div class="month-nav">
+                            <button
+                                class="mnav-btn"
+                                id="btn-prev"
+                                aria-label="Tháng trước"
+                            >
+                                <i class="ti ti-chevron-left"></i>
+                            </button>
+                            <span class="mnav-label" id="mnav-label"></span>
+                            <button
+                                class="mnav-btn"
+                                id="btn-next"
+                                aria-label="Tháng sau"
+                            >
+                                <i class="ti ti-chevron-right"></i>
+                            </button>
+                        </div>
+                        <button class="btn-add" id="btn-add-cat">
+                            <i class="ti ti-plus"></i> Thêm danh mục
+                        </button>
+                    </div>
+                </header>
+                <div class="content">
+                    <div class="sum">
+                        <div class="sum-card">
+                            <h3>Tổng chi tiêu</h3>
+                            <div class="sum-val red" id="s-exp">–</div>
+                            <div class="sum-ch" id="s-exp-ch"></div>
+                        </div>
+                        <div class="sum-card">
+                            <h3>Số danh mục</h3>
+                            <div class="sum-val" id="s-count">–</div>
+                            <div class="sum-ch" id="s-count-sub"></div>
+                        </div>
+                        <div class="sum-card">
+                            <h3>Vượt ngân sách</h3>
+                            <div class="sum-val amber" id="s-warn">–</div>
+                            <div class="sum-ch" id="s-warn-ch"></div>
+                        </div>
+                    </div>
+                    <div class="table">
+                        <div class="table-head">
+                            <div></div>
+                            <div class="th">Danh mục</div>
+                            <div class="th">Ngân sách tháng</div>
+                            <div class="th">% Sử dụng</div>
+                            <div></div>
+                        </div>
+                        <div id="table-body"></div>
+                    </div>
+                </div>
+                <div class="overlay" id="overlay">
+                    <div
+                        class="modal"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="mh-title"
+                    >
+                        <!-- Edit form view -->
+                        <div id="edit-view">
+                            <div class="modal-head">
+                                <div class="mh-ic" id="mh-ic">
+                                    <i class="ti ti-plus"></i>
+                                </div>
+                                <div>
+                                    <div class="mh-title" id="mh-title">
+                                        Thêm danh mục
+                                    </div>
+                                    <div class="mh-sub" id="mh-sub">
+                                        Điền thông tin danh mục mới
+                                    </div>
+                                </div>
+                                <button
+                                    class="modal-close"
+                                    id="btn-close-modal"
+                                    aria-label="Đóng"
+                                >
+                                    <i class="ti ti-x"></i>
+                                </button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="field">
+                                    <label for="f-name">Tên danh mục</label>
+                                    <input
+                                        id="f-name"
+                                        type="text"
+                                        placeholder="VD: Ăn uống"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label for="f-budget"
+                                        >Ngân sách tháng (đ)</label
+                                    >
+                                    <input
+                                        id="f-budget"
+                                        type="number"
+                                        placeholder="VD: 3000000"
+                                    />
+                                </div>
+                                <div class="field">
+                                    <label>Icon</label>
+                                    <div class="icon-picker" id="icon-picker">
+                                        <div
+                                            class="ic-opt sel"
+                                            data-i="ti-tools-kitchen-2"
+                                        >
+                                            <i
+                                                class="ti ti-tools-kitchen-2"
+                                            ></i>
+                                        </div>
+                                        <div
+                                            class="ic-opt"
+                                            data-i="ti-shopping-bag"
+                                        >
+                                            <i class="ti ti-shopping-bag"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-bolt">
+                                            <i class="ti ti-bolt"></i>
+                                        </div>
+                                        <div
+                                            class="ic-opt"
+                                            data-i="ti-motorbike"
+                                        >
+                                            <i class="ti ti-motorbike"></i>
+                                        </div>
+                                        <div
+                                            class="ic-opt"
+                                            data-i="ti-device-tv"
+                                        >
+                                            <i class="ti ti-device-tv"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-heart">
+                                            <i class="ti ti-heart"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-book">
+                                            <i class="ti ti-book"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-plane">
+                                            <i class="ti ti-plane"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-coin">
+                                            <i class="ti ti-coin"></i>
+                                        </div>
+                                        <div class="ic-opt" data-i="ti-coffee">
+                                            <i class="ti ti-coffee"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <label>Màu sắc</label>
+                                    <div class="clr-picker" id="clr-picker">
+                                        <div
+                                            class="clr-opt sel"
+                                            data-bg="#fef3c7"
+                                            data-fg="#d97706"
+                                            style="background: #fef3c7"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#dbeafe"
+                                            data-fg="#2563eb"
+                                            style="background: #dbeafe"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#ede9fe"
+                                            data-fg="#7c3aed"
+                                            style="background: #ede9fe"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#fee2e2"
+                                            data-fg="#dc2626"
+                                            style="background: #fee2e2"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#fce7f3"
+                                            data-fg="#db2777"
+                                            style="background: #fce7f3"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#dcfce7"
+                                            data-fg="#16a34a"
+                                            style="background: #dcfce7"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#e0f2fe"
+                                            data-fg="#0284c7"
+                                            style="background: #e0f2fe"
+                                        ></div>
+                                        <div
+                                            class="clr-opt"
+                                            data-bg="#fef9c3"
+                                            data-fg="#ca8a04"
+                                            style="background: #fef9c3"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-foot">
+                                <button class="btn-del" id="btn-del">
+                                    <i class="ti ti-trash"></i> Xóa
+                                </button>
+                                <button
+                                    class="btn-cancel"
+                                    id="btn-cancel-modal"
+                                >
+                                    Huỷ
+                                </button>
+                                <button class="btn-save" id="btn-save">
+                                    Lưu thay đổi
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm delete view -->
+                        <div class="confirm-view" id="confirm-view">
+                            <div class="confirm-ic">
+                                <i class="ti ti-trash"></i>
+                            </div>
+                            <div class="confirm-title">Xóa danh mục?</div>
+                            <p class="confirm-desc" id="confirm-desc">
+                                Danh mục này sẽ bị xóa vĩnh viễn. Hành động
+                                không thể hoàn tác.
+                            </p>
+                            <div class="confirm-btns">
+                                <button class="cb-back" id="btn-back-confirm">
+                                    <i class="ti ti-arrow-left"></i> Quay lại
+                                </button>
+                                <button class="cb-del" id="btn-del-confirm">
+                                    <i class="ti ti-trash"></i> Xóa vĩnh viễn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <script src="../api/list.js"></script>
+        <script src="../api/home.js"></script>
+        <script>
+            fetch("../nav.html")
+                .then((res) => res.text())
+                .then((data) => {
+                    document.getElementById("nav-container").innerHTML = data;
+                    loadUser();
+                });
+        </script>
+    </body>
+</html>

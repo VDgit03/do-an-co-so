@@ -113,7 +113,7 @@ function renderLastPasswordChange(dateString) {
 
 // đổi mk
 function changePassword() {
-    window.location.href = "./changepw.html"
+    window.location.href = "/frontend/custom/home/changepw.html"
 }
 async function handleChangePassword() {
     try {
