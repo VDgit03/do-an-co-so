@@ -1,12 +1,5 @@
 import express from "express";
-
-import {
-    getBudgets,
-    addBudget,
-    updateBudget,
-    deleteBudget
-} from "../controllers/cate/budgetController.js";
-
+import { getBudgets, addBudget, updateBudget, deleteBudget } from "../controllers/cate/budgetController.js";
 const router = express.Router();
 
 // lấy
