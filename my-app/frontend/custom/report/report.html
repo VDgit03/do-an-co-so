@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Money Track — Báo cáo chi tiêu</title>
+    <link rel="stylesheet" href="../css/report.css" />
+    <link rel="stylesheet" href="../css/nav.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+
+<body>
+    <div class="report">
+        <div id="nav-container"></div>
+        <main>
+            <header class="header">
+                <div>
+                    <h2>Báo cáo chi tiêu</h2>
+                    <div id="current-date"></div>
+                </div>
+
+                <div class="month-switcher">
+                    <button id="prevMonth">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+
+                    <span id="monthText">Tháng 5/2026</span>
+
+                    <button id="nextMonth">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </header>
+            <!-- Summary metrics -->
+            <div class="page">
+                <div class="metrics">
+                    <div class="metric-card">
+                        <div class="metric-label">Thu nhập</div>
+                        <div class="metric-value up" id="val-income">—</div>
+                        <div class="metric-sub">tháng này</div>
+                        <span class="metric-badge up" id="badge-income"></span>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Chi tiêu</div>
+                        <div class="metric-value down" id="val-expense">—</div>
+                        <div class="metric-sub">tháng này</div>
+                        <span class="metric-badge down" id="badge-expense"></span>
+                    </div>
+                </div>
+
+                <!-- Row 1: Pie + Bar -->
+                <p class="section-label">Phân tích danh mục &amp; theo tháng</p>
+
+                <div class="chart-grid-2">
+
+                    <div class="chart-card">
+                        <div class="chart-head">Chi tiêu theo danh mục</div>
+                        <div class="chart-sub">Tháng 5 / 2026 · Biểu đồ tròn</div>
+                        <div class="legend" id="pie-legend"></div>
+                        <div class="canvas-wrap" style="height:220px">
+                            <canvas id="cPie" role="img" aria-label="Biểu đồ tròn chi tiêu theo danh mục tháng 5/2026">
+                                Ăn uống 33%, Di chuyển 18%, Mua sắm 20%, Giải trí 12%, Hóa đơn 10%, Khác 7%
+                            </canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-head">Chi tiêu theo tháng</div>
+                        <div class="chart-sub">12 tháng gần nhất · Biểu đồ cột</div>
+                        <div class="legend">
+                            <span class="legend-item"><span class="legend-dot" style="background:#5DCAA5"></span>Thu
+                                nhập</span>
+                            <span class="legend-item"><span class="legend-dot" style="background:#F0997B"></span>Chi
+                                tiêu</span>
+                        </div>
+                        <div class="canvas-wrap" style="height:220px">
+                            <canvas id="cBar" role="img"
+                                aria-label="Biểu đồ cột thu nhập và chi tiêu 12 tháng gần nhất">
+                                Thu nhập và chi tiêu theo từng tháng.
+                            </canvas>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Row 2: Line trend -->
+                <p class="section-label">Xu hướng tài chính</p>
+
+                <div class="chart-card" style="margin-bottom:14px">
+                    <div class="chart-head">Xu hướng tài chính theo thời gian</div>
+                    <div class="chart-sub">12 tháng gần nhất · Biểu đồ đường</div>
+                    <div class="legend">
+                        <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Thu
+                            nhập</span>
+                        <span class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Chi
+                            tiêu</span>
+                        <span class="legend-item">
+                            <span class="legend-dot" style="background:#378ADD;border-radius:50%"></span>Tiết kiệm (nét
+                            đứt)
+                        </span>
+                    </div>
+                    <div class="canvas-wrap" style="height:240px">
+                        <canvas id="cLine" role="img"
+                            aria-label="Biểu đồ đường xu hướng thu nhập chi tiêu tiết kiệm 12 tháng">
+                            Xu hướng thu nhập, chi tiêu và tiết kiệm 12 tháng.
+                        </canvas>
+                    </div>
+                </div>
+
+                <!-- Row 3: Stacked comparison -->
+                <p class="section-label">So sánh danh mục</p>
+
+                <div class="chart-card">
+                    <div class="chart-head">So sánh chi tiêu theo danh mục và tháng</div>
+                    <div class="chart-sub">Biểu đồ cột xếp chồng · Cơ cấu chi tiêu</div>
+                    <div class="filter-row">
+                        <label for="rangeSelect">Hiển thị:</label>
+                        <select id="rangeSelect">
+                            <option value="6">6 tháng gần nhất</option>
+                            <option value="12" selected>12 tháng gần nhất</option>
+                        </select>
+                    </div>
+                    <div class="legend" id="stacked-legend"></div>
+                    <div class="canvas-wrap" style="height:280px">
+                        <canvas id="cStacked" role="img"
+                            aria-label="Biểu đồ cột xếp chồng so sánh chi tiêu theo danh mục qua các tháng">
+                            Cơ cấu chi tiêu danh mục qua các tháng.
+                        </canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../api/report.js"></script>
+    <script src="../api/home.js"></script>
+    <script>
+        fetch("../nav.html")
+            .then((res) => res.text())
+            .then((data) => {
+                document.getElementById("nav-container").innerHTML = data;
+                loadUser();
+            });
+    </script>
+
+</body>
+
+</html>
