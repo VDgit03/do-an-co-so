@@ -159,6 +159,10 @@ main{
     justify-content: center;
     background: rgba(255,255,255,0.02);
 }
+.form-section{
+    animation:
+        fadeUp 0.5s ease;
+}
 .tab{
     display: flex;
     background: rgba(255,255,255,0.05);
@@ -210,3 +214,21 @@ main{
     .page { grid-template-columns: 1fr; }
     .left { display: none; }
     .right { padding: 40px 28px; }}
+    @keyframes fadeUp {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(20px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+    }
+}

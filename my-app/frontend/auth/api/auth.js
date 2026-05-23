@@ -14,22 +14,87 @@ function togglePassword(el) {
 }
 
 // đổi tab
-function switchTab(tab) {
-    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
 
-    let file = tab === 'login' ? 'login.html' : 'register.html';
+function switchTab(tab) {
+
+    const loginTab =
+        document.getElementById("tab-login");
+
+    const registerTab =
+        document.getElementById("tab-register");
+
+    if (tab === "forgot" || tab === "otp" || tab === "reset") {
+
+        loginTab.style.display = "none";
+
+        registerTab.style.display = "none";
+
+    } else {
+
+        loginTab.style.display = "block";
+
+        registerTab.style.display = "block";
+    }
+
+    loginTab.classList.toggle(
+        "active",
+        tab === "login"
+    );
+
+    registerTab.classList.toggle(
+        "active",
+        tab === "register"
+    );
+
+    let file = "";
+
+    if (tab === "login") {
+        file = "login.html";
+    }
+    
+    else if (tab === "reset") {
+        file = "reset.html";
+    }
+
+    else if (tab === "register") {
+        file = "register.html";
+    }
+
+    else if (tab === "forgot") {
+        file = "forgot.html";
+    }
+
+    else if (tab === "otp") {
+        file = "otp.html";
+    }
 
     fetch(file)
+
         .then(res => res.text())
+
         .then(data => {
-            document.getElementById('content').innerHTML = data;
+
+            document.getElementById(
+                "content"
+            ).innerHTML = data;
+
+            if (tab === "otp") { 
+                setTimeout( 
+                    initOtpInputs,
+                    0
+                );
+            }
 
             if (tab === "login") {
-                setTimeout(initGoogle, 0); 
+                setTimeout(
+                    initGoogle,
+                    0
+                );
             }
         });
 }
+
+
 // load mặc định
 window.onload = () => switchTab('login');
 
