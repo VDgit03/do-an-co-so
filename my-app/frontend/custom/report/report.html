@@ -138,13 +138,16 @@
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../api/report.js"></script>
-    <script src="../api/home.js"></script>
+    <script src="../api/home.js"></script>s
     <script>
         fetch("../nav.html")
             .then((res) => res.text())
             .then((data) => {
                 document.getElementById("nav-container").innerHTML = data;
-                loadUser();
+
+                if (typeof loadUser === "function") {
+                    loadUser();
+                }
             });
     </script>
 

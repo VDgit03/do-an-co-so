@@ -18,6 +18,7 @@ document.addEventListener("click", (e) => {
     }
 });
 
+
 // time
 function updateDateTime() {
     const now = new Date();
@@ -38,18 +39,70 @@ function updateDateTime() {
 }
 updateDateTime();
 setInterval(updateDateTime, 60000);
-/* =========================================================
-   MONTH SWITCHER
-========================================================= */
 
-const monthText = document.getElementById("monthText");
-const prevBtn = document.getElementById("prevMonth");
-const nextBtn = document.getElementById("nextMonth");
+const REPORTS = {}
+let DATA = {};
+let currentMonth = 5;
+let currentYear = 2026;
+
+/* month trans */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const monthText =
+        document.getElementById("monthText");
+
+    const prevBtn =
+        document.getElementById("prevMonth");
+
+    const nextBtn =
+        document.getElementById("nextMonth");
 
 
-/* =========================================================
-   CHART VARIABLES
-========================================================= */
+    function renderMonth() {
+
+        monthText.textContent =
+            `Tháng ${currentMonth}/${currentYear}`;
+    }
+
+    prevBtn.addEventListener("click", () => {
+
+        currentMonth--;
+
+        if (currentMonth < 1) {
+
+            currentMonth = 12;
+            currentYear--;
+        }
+
+        renderMonth();
+
+        loadReport(currentMonth, currentYear);
+    });
+
+    nextBtn.addEventListener("click", () => {
+
+        currentMonth++;
+
+        if (currentMonth > 12) {
+
+            currentMonth = 1;
+            currentYear++;
+        }
+
+        renderMonth();
+
+        loadReport(currentMonth, currentYear);
+    });
+
+    renderMonth();
+
+    loadReport(currentMonth, currentYear);
+
+});
+
+
+/* chart */
 
 let pieChart = null;
 let barChart = null;
@@ -102,44 +155,22 @@ function buildLegend(containerId, labels, colors, values) {
    LOAD REPORT
 ========================================================= */
 
-function loadReport(month, year) {
+async function loadReport(month, year) {
 
-    const key = `${month}-${year}`;
+    try {
 
-    if (REPORTS[key]) {
+        const res = await fetch(
+            `http://localhost:3000/api/reports?month=${month}&year=${year}`
+        );
 
-        DATA = REPORTS[key];
+        DATA = await res.json();
 
-    } else {
+        rerenderAll();
 
-        DATA = {
-            summary: {
-                income: 0,
-                expense: 0,
-                saving: 0,
-                balance: 0,
-                incomeChange: 0,
-                expenseChange: 0,
-                savingRate: 0
-            },
+    } catch (err) {
 
-            categories: {
-                labels: [],
-                values: [],
-                colors: []
-            },
-
-            monthly: {
-                labels: [],
-                income: [],
-                expense: []
-            },
-
-            categoryMonthly: []
-        };
+        console.error(err);
     }
-
-    rerenderAll();
 }
 
 /* =========================================================
@@ -443,62 +474,42 @@ function rerenderAll() {
     renderStacked(12);
 }
 
-/* =========================================================
-   MONTH BUTTON EVENTS
-========================================================= */
+// /* =========================================================
+//    MONTH BUTTON EVENTS
+// ========================================================= */
 
-prevBtn.addEventListener("click", () => {
+// prevBtn.addEventListener("click", () => {
 
-    currentMonth--;
+//     currentMonth--;
 
-    if (currentMonth < 1) {
+//     if (currentMonth < 1) {
 
-        currentMonth = 12;
+//         currentMonth = 12;
 
-        currentYear--;
-    }
+//         currentYear--;
+//     }
 
-    renderMonth();
+//     renderMonth();
 
-    loadReport(currentMonth, currentYear);
-});
-
-nextBtn.addEventListener("click", () => {
-
-    currentMonth++;
-
-    if (currentMonth > 12) {
-
-        currentMonth = 1;
-
-        currentYear++;
-    }
-
-    renderMonth();
-
-    loadReport(currentMonth, currentYear);
-});
+//     loadReport(
+//         currentMonth,
+//         currentYear
+//     );
+// });
 
 /* =========================================================
    INIT
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-    renderMonth();
+        renderMonth();
 
-    rerenderAll();
-
-    const rangeSelect =
-        document.getElementById("rangeSelect");
-
-    if (rangeSelect) {
-
-        rangeSelect.addEventListener("change", function () {
-
-            renderStacked(
-                parseInt(this.value)
-            );
-        });
+        loadReport(
+            currentMonth,
+            currentYear
+        );
     }
-});
+);

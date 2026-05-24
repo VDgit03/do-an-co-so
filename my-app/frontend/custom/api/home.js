@@ -1,5 +1,5 @@
 // button wallet
-function toggleWalletMenu(){
+function toggleWalletMenu() {
     const menu = document.getElementById("walletMenu");
     const arrow = document.querySelector(".arrow");
     menu.classList.toggle("show");
@@ -13,7 +13,7 @@ function toggleUserMenu() {
 document.addEventListener("click", (e) => {
     const user = document.querySelector(".user");
     const menu = document.getElementById("userMenu");
-    if ( user && !user.contains(e.target)) {
+    if (user && !user.contains(e.target)) {
         menu.classList.remove("show");
     }
 });
@@ -79,6 +79,10 @@ function renderLastPasswordChange(dateString) {
         "last-ago"
     );
 
+    // không có element thì dừng
+    if (!dateEl || !agoEl) return;
+
+
     // chưa từng đổi
     if (!dateString) {
         dateEl.textContent = "Chưa đổi";
@@ -105,7 +109,7 @@ function renderLastPasswordChange(dateString) {
     const diffTime = now - date;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     if (diffDays === 0) {
-        agoEl.textContent ="";
+        agoEl.textContent = "";
     } else {
         agoEl.textContent = `${diffDays} ngày trước`;
     }
@@ -163,7 +167,7 @@ async function handleChangePassword() {
         // account google
         if (data.isGoogle) {
             document.querySelector(".form").innerHTML =
-            `
+                `
             <h2>
                 Tài khoản Google
             </h2>
@@ -204,18 +208,18 @@ function togglePassword(el) {
 }
 // kiểm tra mk
 function checkStrength(val) {
-    const segs = ['s1','s2','s3','s4'].map(id => document.getElementById(id));
+    const segs = ['s1', 's2', 's3', 's4'].map(id => document.getElementById(id));
     const label = document.getElementById('strength-text');
     segs.forEach(s => { s.style.background = 'rgba(255,255,255,0.1)'; });
     if (!val) { label.textContent = ''; return; }
     let score = 0;
-    if (val.length >= 8)  score++;
+    if (val.length >= 8) score++;
     if (/[A-Z]/.test(val)) score++;
     if (/[0-9]/.test(val)) score++;
     if (/[^A-Za-z0-9]/.test(val)) score++;
-    const colors  = ['#E24B4A','#EF9F27','#1D9E75','#4FAAFF'];
-    const labels  = ['Rất yếu','Trung bình','Khá mạnh','Rất mạnh'];
-    for (let i = 0; i < score; i++) segs[i].style.background = colors[Math.min(score-1,3)];
-    label.textContent = labels[Math.min(score-1,3)];
-    label.style.color = colors[Math.min(score-1,3)];
-  }
+    const colors = ['#E24B4A', '#EF9F27', '#1D9E75', '#4FAAFF'];
+    const labels = ['Rất yếu', 'Trung bình', 'Khá mạnh', 'Rất mạnh'];
+    for (let i = 0; i < score; i++) segs[i].style.background = colors[Math.min(score - 1, 3)];
+    label.textContent = labels[Math.min(score - 1, 3)];
+    label.style.color = colors[Math.min(score - 1, 3)];
+}
