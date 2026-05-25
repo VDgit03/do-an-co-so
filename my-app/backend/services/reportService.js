@@ -1,6 +1,6 @@
 import {
     getTransactionsByMonth
-} from "../../models/transactionModel.js";
+} from "../models/transactionModel.js";
 
 export async function buildMonthlyReport(
     userId,
@@ -39,12 +39,17 @@ export async function buildMonthlyReport(
         }
 
         if (t.type === "income") {
+
             income += amount;
+
+            monthlyMap[monthKey].income += amount;
         }
 
         if (t.type === "expense") {
 
             expense += amount;
+
+            monthlyMap[monthKey].expense += amount;
 
             const category =
                 t.category_name || "Khác";

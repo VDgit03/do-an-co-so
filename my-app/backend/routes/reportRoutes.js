@@ -2,7 +2,7 @@ import express from "express";
 
 import {
     getMonthlyReport
-} from "../controllers/auth/reportController.js";
+} from "../controllers/reportController.js";
 
 const router = express.Router();
 

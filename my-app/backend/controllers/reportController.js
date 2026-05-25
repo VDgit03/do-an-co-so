@@ -1,6 +1,6 @@
 import {
     buildMonthlyReport
-} from "../../services/auth/reportService.js";
+} from "../services/reportService.js";
 
 export async function getMonthlyReport(
     req,
