@@ -88,6 +88,7 @@ main {
     gap: 20px;
     padding: 20px;
     justify-content: center;
+    align-items: start;
 }
 
 /* Màn nhỏ -> 1 card mỗi hàng */
@@ -114,9 +115,13 @@ main {
 
     display: flex;
     flex-direction: column;
-    aspect-ratio: 1 / 1;
     overflow: hidden;
     transition: border-color 0.15s;
+    min-height: 420px;
+}
+
+.drop-side svg {
+    display: block;
 }
 
 .card:hover {

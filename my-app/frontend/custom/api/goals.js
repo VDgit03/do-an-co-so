@@ -4,6 +4,8 @@ const TODAY = new Date(2026, 4, 24); // 24/05/2026
 let activeDepId = null; // ID mục tiêu đang nạp tiền
 let selectedCI = 0;    // Màu đang chọn trong form
 
+let goals = [];
+let nextId = 1;
 // ============================================================
 //  HELPERS
 // ============================================================
@@ -102,7 +104,7 @@ function buildDrop(goal, W, H) {
 
   return `
     <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
-         style="width:${W}px;height:${H}px;display:block;overflow:visible">
+         style="width:${W}px;height:${H}px;display:block">
       <defs>
         <clipPath id="${id}"><path d="${dropPath}"/></clipPath>
       </defs>
@@ -262,7 +264,7 @@ function toInputDate(str) {
 function buildGoalForm(g) {
   const isEdit = !!g;
   selectedCI = isEdit ? g.ci : 0;
-  const today = '24/05/2026';
+  const TODAY = new Date();
 
   const colorDots = COLORS.map((c, i) => `
     <div class="cp ${i === selectedCI ? 'sel' : ''}"
@@ -287,13 +289,13 @@ function buildGoalForm(g) {
       <div class="field">
         <label>Ngày tạo</label>
         <input type="date" id="f-created"
-               value="${isEdit ? g.created : today}"
+               value="${isEdit ? toInputDate(g.created) : today}"
                oninput="updatePreview()"/>
       </div>
       <div class="field">
         <label>Ngày hoàn tất</label>
         <input type="date" id="f-deadline"
-               value="${isEdit ? g.deadline : ''}"
+               value="${isEdit ? toInputDate(g.deadline) : ''}"
                oninput="updatePreview()"/>
       </div>
     </div>
@@ -388,29 +390,75 @@ function formatDate(str) {
   return `${d}/${m}/${y}`;
 }
 
-function saveGoal(id) {
-  const name = document.getElementById('f-name').value.trim();
-  const target = parseInt(document.getElementById('f-target').value) || 0;
-  const saved = Math.min(parseInt(document.getElementById('f-saved').value) || 0, target);
-  const created = formatDate(document.getElementById('f-created').value);
-  const deadline = formatDate(document.getElementById('f-deadline').value);
+function formatVNDate(dateStr) {
 
-  if (!name || !target) {
-    alert('Vui lòng nhập tên và số tiền mục tiêu.');
-    return;
+  const d = new Date(dateStr);
+
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
+
+async function saveGoal(id) {
+
+  const name =
+    document.getElementById('f-name').value.trim();
+
+  const target_amount =
+    parseInt(document.getElementById('f-target').value) || 0;
+
+  const saved_amount =
+    parseInt(document.getElementById('f-saved').value) || 0;
+
+  const start_date =
+    document.getElementById('f-created').value;
+
+  const deadline =
+    document.getElementById('f-deadline').value;
+
+  if (!name || !target_amount) return;
+
+  const token = localStorage.getItem("token");
+
+  const data = {
+    name,
+    target_amount,
+    saved_amount,
+    color_index: selectedCI,
+    start_date,
+    deadline
+  };
+
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      "http://localhost:3000/api/goals",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      }
+    );
+
+    const result = await res.json();
+
+    console.log(result);
+
+    closeModal();
+
+    loadGoals();
+
+  } catch (err) {
+
+    console.log(err);
   }
-
-  if (id === -1) {
-    // Thêm mới
-    goals.push({ id: nextId++, name, target, saved, ci: selectedCI, created, deadline });
-  } else {
-    // Chỉnh sửa
-    const g = goals.find(x => x.id === id);
-    Object.assign(g, { name, target, saved, ci: selectedCI, created, deadline });
-  }
-
-  closeModal();
-  renderAll();
 }
 
 
@@ -526,6 +574,50 @@ const COLORS = [
 //  INIT
 // ============================================================
 
-document.getElementById('btn-open-new').addEventListener('click', openNew);
 
-renderAll();
+
+
+async function loadGoals() {
+
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      "http://localhost:3000/api/goals",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    console.log(data);
+
+    if (!Array.isArray(data)) return;
+
+    goals = data.map(g => ({
+      id: g.id,
+      name: g.name,
+      target: Number(g.target_amount),
+      saved: Number(g.saved_amount),
+      ci: g.color_index,
+      created: g.start_date
+        ? formatVNDate(g.start_date)
+        : '',
+      deadline: g.deadline
+        ? formatVNDate(g.deadline)
+        : ''
+    }));
+
+    renderAll();
+
+  } catch (err) {
+
+    console.log(err);
+  }
+}
+document.getElementById('btn-open-new').addEventListener('click', openNew);
+loadGoals();
