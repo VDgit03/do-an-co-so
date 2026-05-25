@@ -89,4 +89,25 @@ CREATE TABLE password_resets (
     REFERENCES users(id)
     ON DELETE CASCADE
 );
+-- Goal
+CREATE TABLE goals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    wallet_id INT NULL,
+    name VARCHAR(255) NOT NULL,
+    target_amount DECIMAL(15,2) NOT NULL,
+    saved_amount DECIMAL(15,2) DEFAULT 0,
+    color_index INT DEFAULT 0,
+    start_date DATE,
+    deadline DATE,
+    status ENUM('active', 'completed', 'overdue') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
+    FOREIGN KEY (user_id)
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (wallet_id)
+        REFERENCES wallets(id)
+        ON DELETE SET NULL
+);
