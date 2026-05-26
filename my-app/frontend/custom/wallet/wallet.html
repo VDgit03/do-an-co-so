@@ -6,14 +6,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <title>MoneyTrack — Ví của tôi</title>
-
-        <!-- Tabler Icons -->
         <link
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"
         />
-
-        <!-- Font -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
             rel="stylesheet"
@@ -23,30 +19,19 @@
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
             rel="stylesheet"
         />
-
-        <!-- CSS -->
         <link rel="stylesheet" href="../css/nav.css" />
-
         <link rel="stylesheet" href="../css/wallet.css" />
     </head>
-
     <body>
         <div class="shell">
-            <!-- NAV -->
             <div id="nav-container"></div>
-
-            <!-- MAIN -->
             <div class="main">
-                <!-- TOPBAR -->
                 <header class="topbar">
                     <div class="title">
                         <h2>Ví của tôi</h2>
-
                         <div id="current-date"></div>
                     </div>
-
                     <div class="tb-right">
-                        <!-- FILTER BUTTON -->
                         <button
                             class="filter-btn"
                             id="filter-toggle-btn"
@@ -54,24 +39,15 @@
                         >
                             <i class="ti ti-adjustments-horizontal"></i>
                         </button>
-
-                        <!-- ADD BUTTON -->
                         <button class="btn-add" onclick="openAdd()">
                             <i class="ti ti-plus"></i>
-
                             <span> Thêm ví </span>
                         </button>
                     </div>
                 </header>
-
-                <!-- TOAST -->
                 <div id="toast-area" class="toast-area"></div>
-
-                <!-- CONTENT -->
                 <main class="content">
-                    <!-- FILTER -->
                     <div id="filter-panel" class="filter-panel">
-                        <!-- SEARCH -->
                         <input
                             type="text"
                             id="q"
@@ -81,8 +57,6 @@
                                 updateFilterBadge();
                             "
                         />
-
-                        <!-- CATEGORY -->
                         <select
                             id="fcat"
                             onchange="
@@ -91,85 +65,57 @@
                             "
                         >
                             <option value="">Tất cả loại</option>
-
                             <option value="salary">Lương</option>
-
                             <option value="freelance">Freelance</option>
-
                             <option value="investment">Đầu tư</option>
-
                             <option value="bonus">Thưởng</option>
-
                             <option value="other">Khác</option>
                         </select>
-
-                        <!-- SORT -->
                         <select id="fsort" onchange="render()">
                             <option value="date-desc">Mới nhất</option>
-
                             <option value="amt-desc">Cao nhất</option>
-
                             <option value="amt-asc">Thấp nhất</option>
-
                             <option value="name-asc">A → Z</option>
                         </select>
                     </div>
-
-                    <!-- SUMMARY -->
                     <div class="summary">
                         <div class="sm">
                             <div class="sm-lbl">
                                 <i class="ti ti-wallet"></i>
                                 Tổng thu
                             </div>
-
                             <div class="sm-val" id="s-total">—</div>
-
                             <div class="sm-sub" id="s-cnt">—</div>
                         </div>
-
                         <div class="sm">
                             <div class="sm-lbl">
                                 <i class="ti ti-trending-up"></i>
                                 Cao nhất
                             </div>
-
                             <div class="sm-val" id="s-max">—</div>
-
                             <div class="sm-sub" id="s-max-name">—</div>
                         </div>
-
                         <div class="sm">
                             <div class="sm-lbl">
                                 <i class="ti ti-calculator"></i>
                                 Trung bình
                             </div>
-
                             <div class="sm-val" id="s-avg">—</div>
                         </div>
-
                         <div class="sm">
                             <div class="sm-lbl">
                                 <i class="ti ti-calendar"></i>
                                 Tháng này
                             </div>
-
                             <div class="sm-val" id="s-month">—</div>
-
                             <div class="sm-sub" id="s-month-cnt">—</div>
                         </div>
                     </div>
-
-                    <!-- GRID -->
                     <div id="grid" class="cards-grid"></div>
                 </main>
-
-                <!-- MODAL -->
                 <div id="modal-area"></div>
             </div>
         </div>
-
-        <!-- ESC CLOSE MODAL -->
         <script>
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") {
@@ -177,20 +123,13 @@
                 }
             });
         </script>
-
-        <!-- JS -->
         <script src="../api/home.js"></script>
-
         <script src="../api/wallet.js"></script>
-
-        <!-- LOAD NAV -->
         <script>
             fetch("../nav.html")
                 .then((res) => res.text())
-
                 .then((data) => {
                     document.getElementById("nav-container").innerHTML = data;
-
                     if (typeof loadUser === "function") {
                         loadUser();
                     }

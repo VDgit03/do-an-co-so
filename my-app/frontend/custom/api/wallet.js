@@ -51,7 +51,7 @@ const CATEGORIES = {
         label: "Đầu tư",
         icon: "ti-trending-up",
         badge: "b-investment",
-        icon_cls: "i-investment"
+        icon_cls: "i-invest"
     },
     bonus: {
         label: "Thưởng",
