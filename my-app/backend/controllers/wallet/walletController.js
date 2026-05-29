@@ -6,6 +6,7 @@ import {
     deleteWalletService
 } from "../../services/wallet/walletService.js";
 
+
 // lấy
 export const getAllWallets = async (
     _req,
@@ -13,7 +14,9 @@ export const getAllWallets = async (
 ) => {
     try {
         const wallets = await getAllWalletsService();
-        res.json(wallets);
+        res.json({
+            wallets
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({
@@ -29,10 +32,10 @@ export const getWalletsByUser = async (
 ) => {
     try {
         const { userId } = req.params;
-        const wallets = await getWalletsByUserService(
-                userId
-            );
-        res.json(wallets);
+        const wallets = await getWalletsByUserService(userId);
+        res.json({
+            wallets
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({
@@ -54,19 +57,27 @@ export const createWallet = async (
             amount,
             note
         } = req.body;
-        if (!user_id || !name || !type || amount === undefined) {
+        if (
+            !user_id ||
+            !name ||
+            !type ||
+            amount === undefined
+        ) {
             return res.status(400).json({
                 message: "Thiếu dữ liệu"
             });
         }
-        const wallet = await createWalletService(
+        const wallet =
+            await createWalletService(
                 user_id,
                 name,
                 type,
                 amount,
                 note
             );
-        res.status(201).json(wallet);
+        res.status(201).json({
+            wallet
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({
@@ -88,15 +99,16 @@ export const updateWallet = async (
             amount,
             note
         } = req.body;
-        const wallet =
-            await updateWalletService(
+        const wallet = await updateWalletService(
                 id,
                 name,
                 type,
                 amount,
                 note
             );
-        res.json(wallet);
+        res.json({
+            wallet
+        });
     } catch (err) {
         console.log(err);
         res.status(500).json({

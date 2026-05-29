@@ -5,6 +5,7 @@ import {
     removeCategory
 } from "../../services/cate/cateService.js";
 
+
 // lấy cate
 export const getCategories = async (
     req,
@@ -13,12 +14,15 @@ export const getCategories = async (
     try {
         const { userId } = req.params;
         const { month, year } = req.query;
-        const data = await getAllCategories(
-            userId,
-            month,
-            year
-        );
-        res.json(data);
+        const categories =
+            await getAllCategories(
+                userId,
+                month,
+                year
+            );
+        res.json({
+            categories
+        });
     } catch (err) {
         res.status(500).json({
             message: err.message
@@ -33,13 +37,17 @@ export const createCategory = async (
 ) => {
     try {
         const result = await addCategory(req.body);
-        res.json(result);
+        res.json({
+            result
+        });
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: err.message
         });
     }
 };
+
 
 // update cate
 export const updateCategory = async (
@@ -48,12 +56,16 @@ export const updateCategory = async (
 ) => {
     try {
         const { id } = req.params;
-        const result = await editCategory(
-            id,
-            req.body
-        );
-        res.json(result);
+        const result =
+            await editCategory(
+                id,
+                req.body
+            );
+        res.json({
+            result
+        });
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: err.message
         });
@@ -68,13 +80,17 @@ export const deleteCategory = async (
     try {
         const { id } = req.params;
         const { month, year } = req.query;
-        const result = await removeCategory(
-            id,
-            month,
-            year
-        );
-        res.json(result);
+        const result =
+            await removeCategory(
+                id,
+                month,
+                year
+            );
+        res.json({
+            result
+        });
     } catch (err) {
+        console.log(err);
         res.status(500).json({
             message: err.message
         });
