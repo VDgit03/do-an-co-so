@@ -52,9 +52,9 @@ CREATE TABLE wallets (
 CREATE TABLE transaction(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    wallet_id INT NOT NULL,
+    wallet_id INT NULL,
     category_id INT NULL,
-    type ENUM('income', 'expense', 'saving') NOT NULL,
+    type ENUM('income', 'expense') NOT NULL,
     amount DECIMAL(15,2) NOT NULL,
     title VARCHAR(255),
     note TEXT,
@@ -120,3 +120,10 @@ CREATE TABLE goals (
         REFERENCES wallets(id)
         ON DELETE SET NULL
 );
+
+ALTER TABLE wallets
+ADD icon VARCHAR(50),
+ADD bg_color VARCHAR(20),
+ADD fg_color VARCHAR(20);
+ALTER TABLE budgets
+ADD UNIQUE KEY uniq_budget (user_id, category_id, month, year);
