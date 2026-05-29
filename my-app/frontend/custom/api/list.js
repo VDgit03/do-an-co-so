@@ -40,14 +40,23 @@ const fmt = (n) =>
 // load api
 async function loadCategories() {
     try {
-        const res = await fetch(
-            `${API_URL}/${userId}?month=${curMonth}&year=${curYear}`
-        );
+        const userId = localStorage.getItem("userId");
+
+        const url =
+            `${API_URL}/${userId}?month=${curMonth}&year=${curYear}`;
+
+        console.log("FETCH:", url);
+
+        const res = await fetch(url);
         const data = await res.json();
-        categories = data;
-        console.log(data);
+
+        console.log("API RESPONSE:", data);
+
+        categories = data.categories ?? [];
+
         render();
         updateSummary();
+
     } catch (err) {
         console.log(err);
     }

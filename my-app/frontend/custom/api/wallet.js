@@ -69,16 +69,29 @@ const CATEGORIES = {
 
 // lấy ví
 async function loadWallets() {
+
     try {
-        const userId = localStorage.getItem("userId");
+
+        const userId =
+            localStorage.getItem("userId");
+
         const res = await fetch(
             `${API_URL}/user/${userId}`
         );
+
         const data = await res.json();
-        wallets = data;
+
+        wallets =
+            data.wallets || [];
+
+        console.log(wallets);
+
         render();
+
     } catch (err) {
+
         console.error(err);
+
         toast(
             "Không thể tải dữ liệu",
             "danger"
