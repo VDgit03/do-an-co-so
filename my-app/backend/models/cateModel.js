@@ -1,191 +1,122 @@
 import pool from "../config/db.js";
 
+// lấy
+export const getAllCategoriesModel = async (userId, month, year) => {
+  const [rows] = await pool.query(
+    `
+    SELECT
+        c.id,
+        c.name,
+        c.icon,
+        c.bg_color,
+        c.fg_color,
+        COALESCE(b.amount, 0) AS budget,
+        COALESCE(SUM(t.amount), 0) AS spent
 
-// lấy categories
-export const getAllCategoriesModel =
-async (
-    userId,
-    month,
-    year
-) => {
+    FROM categories c
 
-    const [rows] = await pool.query(
-        `
-        SELECT
-            c.id,
-            c.name,
-            c.icon,
-            c.bg_color,
-            c.fg_color,
-            b.amount AS budget
+    INNER JOIN budgets b
+        ON c.id = b.category_id
+        AND b.user_id = ?
+        AND b.month = ?
+        AND b.year = ?
 
-        FROM budgets b
+    LEFT JOIN transaction t
+        ON t.category_id = c.id
+        AND t.user_id = ?
+        AND t.type = 'expense'
+        AND t.transaction_date >= ?
+        AND t.transaction_date < ?
 
-        INNER JOIN categories c
-            ON c.id = b.category_id
+    WHERE c.user_id = ?
 
-        WHERE
-            b.user_id = ?
-            AND b.month = ?
-            AND b.year = ?
-        `,
-        [userId, month, year]
-    );
+    GROUP BY
+        c.id, c.name, c.icon, c.bg_color, c.fg_color, b.amount
 
-    return rows;
+    ORDER BY c.created_at DESC
+    `,
+    [
+      userId, month, year,
+      userId,
+      `${year}-${String(month).padStart(2,'0')}-01`,
+      `${year}-${String(month).padStart(2,'0')}-31`,
+      userId
+    ]
+  );
+
+  return rows;
 };
 
-
-// thêm category
-export const addCategoryModel =
-async (data) => {
-
+// tạo
+export const addCategoryModel = async (data) => {
     const {
-
         user_id,
-
         name,
-
         icon,
-
         bg_color,
-
         fg_color,
-
         budget,
-
         month,
-
         year
-
     } = data;
-
     const [result] = await pool.query(
         `
         INSERT INTO categories
-        (
-            user_id,
-            name,
-            icon,
-            bg_color,
-            fg_color
-        )
+        (user_id, name, icon, bg_color, fg_color)
         VALUES (?, ?, ?, ?, ?)
         `,
-        [
-            user_id,
-            name,
-            icon,
-            bg_color,
-            fg_color
-        ]
+        [user_id, name, icon, bg_color, fg_color]
     );
-
-    const categoryId =
-        result.insertId;
-
+    const categoryId = result.insertId;
     await pool.query(
         `
         INSERT INTO budgets
-        (
-            user_id,
-            category_id,
-            amount,
-            month,
-            year
-        )
+        (user_id, category_id, amount, month, year)
         VALUES (?, ?, ?, ?, ?)
         `,
-        [
-            user_id,
-            categoryId,
-            budget,
-            month,
-            year
-        ]
+        [user_id, categoryId, budget || 0, month, year]
     );
+    return result;
 };
 
-
-// update category
-export const editCategoryModel =
-async (
-    id,
-    data
-) => {
-
+// update
+export const editCategoryModel = async (id, data) => {
     const {
-
+        user_id,
         name,
-
         icon,
-
         bg_color,
-
         fg_color,
-
         budget,
-
         month,
-
         year
-
     } = data;
-
     await pool.query(
         `
         UPDATE categories
-        SET
-            name = ?,
-            icon = ?,
-            bg_color = ?,
-            fg_color = ?
+        SET name = ?, icon = ?, bg_color = ?, fg_color = ?
         WHERE id = ?
         `,
-        [
-            name,
-            icon,
-            bg_color,
-            fg_color,
-            id
-        ]
+        [name, icon, bg_color, fg_color, id]
     );
-
     await pool.query(
         `
-        UPDATE budgets
-        SET amount = ?
-        WHERE
-            category_id = ?
-            AND month = ?
-            AND year = ?
+        INSERT INTO budgets
+        (user_id, category_id, amount, month, year)
+        VALUES (?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE amount = VALUES(amount)
         `,
-        [
-            budget,
-            id,
-            month,
-            year
-        ]
+        [user_id, id, budget || 0, month, year]
     );
 };
 
-
-// xóa category
-export const removeCategoryModel =
-async (
-    id,
-    month,
-    year
-) => {
-
+// xóa
+export const removeCategoryModel = async (id) => {
     await pool.query(
         `
-        DELETE FROM budgets
-        WHERE
-            category_id = ?
-            AND month = ?
-            AND year = ?
+        DELETE FROM categories
+        WHERE id = ?
         `,
-        [id, month, year]
+        [id]
     );
 };

@@ -1,79 +1,67 @@
-
 import pool from "../config/db.js";
 
 // lấy budgets
-export const getBudgetsModel =
-async () => {
-
-    const [rows] = await pool.query(`
+export const getBudgetsModel = async (userId, month, year) => {
+    const [rows] = await pool.query(
+        `
         SELECT
-            budgets.id,
-            budgets.amount,
-            budgets.month,
-            budgets.year,
+            b.id,
+            b.amount,
+            b.month,
+            b.year,
 
-            categories.name,
-            categories.icon,
-            categories.bg_color,
-            categories.fg_color
+            c.id AS category_id,
+            c.name,
+            c.icon,
+            c.bg_color,
+            c.fg_color
+        
+        FROM budgets b
 
-        FROM budgets
+        INNER JOIN categories c
+            ON b.category_id = c.id
 
-        INNER JOIN categories
-        ON budgets.category_id = categories.id
+        WHERE b.user_id = ?
+        AND b.month = CAST(? AS UNSIGNED)
+        AND b.year = CAST(? AS UNSIGNED)
 
-        ORDER BY budgets.id DESC
-    `);
+        ORDER BY b.id DESC;
+        `,
+        [userId, month, year]
+    );
 
     return rows;
 };
 
-
 // thêm budget
-export const addBudgetModel =
-async (
+export const addBudgetModel = async (
     user_id,
     category_id,
     amount,
     month,
     year
 ) => {
-
-    await pool.query(`
+    await pool.query(
+        `
         INSERT INTO budgets
-        (
-            user_id,
-            category_id,
-            amount,
-            month,
-            year
-        )
+        (user_id, category_id, amount, month, year)
         VALUES (?, ?, ?, ?, ?)
-    `, [
-        user_id,
-        category_id,
-        amount,
-        month,
-        year
-    ]);
+        ON DUPLICATE KEY UPDATE amount = VALUES(amount);
+        `,
+        [user_id, category_id, amount, month, year]
+    );
 };
 
-
 // update budget
-export const updateBudgetModel =
-async (
-    id,
-    amount
-) => {
-
-    await pool.query(`
+export const updateBudgetModel = async (id, amount) => {
+    await pool.query(
+        `
         UPDATE budgets
         SET amount = ?
         WHERE id = ?
-    `, [
-        amount,
-        id
-    ]);
+        `,
+        [amount, id]
+    );
 };
 
 
@@ -86,4 +74,3 @@ async (id) => {
         WHERE id = ?
     `, [id]);
 };
-
