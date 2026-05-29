@@ -381,7 +381,7 @@ color: white; }
 .modal-header-actions { display: flex; gap: 6px; align-items: center; }
 .btn-back {
   display: flex; align-items: center; gap: 4px;
-  font-size: 12px; padding: 4px 8px;
+  font-size: 13px; padding: 6px 8px;
   border-radius: 6px; border: none;
   background: rgba(0,0,0,0.07); cursor: pointer;
   font-family: 'Be Vietnam Pro', sans-serif;
@@ -477,19 +477,7 @@ color: white; }
 .btn-save.income  { background: #3B6D11; color: #fff; }
 .btn-save.expense { background: #A32D2D; color: #fff; }
 
-/* ─── TOAST ──────────────────────────────────────── */
-.toast {
-  position: fixed; bottom: 24px; left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  padding: 10px 20px; border-radius: 8px;
-  font-size: 13px; font-weight: 500;
-  opacity: 0; pointer-events: none;
-  transition: all 0.3s; white-space: nowrap;
-  z-index: 500; display: flex; align-items: center; gap: 8px;
-}
-.toast.income  { background: #27500A; color: #C0DD97; }
-.toast.expense { background: #791F1F; color: #F7C1C1; }
-.toast.show    { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 /* ─────────────────────────────────────────
    CHECKBOX + ACTION COLUMN
 ───────────────────────────────────────── */
@@ -718,4 +706,73 @@ input[type="checkbox"]:checked::after {
     opacity: 1;
     transform: translateY(0);
   }
+}
+.toast-area{
+    position: fixed;
+
+    top: 24px;
+    right: 24px;
+
+    z-index: 99999;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 12px;
+
+    align-items: flex-end;
+
+    pointer-events: none;
+}
+
+.toast{
+    min-width: 240px;
+
+    padding: 12px 16px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #fff;
+
+    box-shadow:
+      0 10px 25px rgba(0,0,0,.12);
+
+    opacity: 1;
+
+    transition:
+      opacity .4s ease,
+      transform .4s ease;
+
+    animation:
+      toastIn .25s ease;
+}
+
+/* TYPES */
+.t-success{
+    background: #22c55e;
+}
+
+.t-danger{
+    background: #ef4444;
+}
+
+.t-warning{
+    background: #f59e0b;
+}
+
+/* ANIMATION */
+@keyframes toastIn{
+
+    from{
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to{
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
