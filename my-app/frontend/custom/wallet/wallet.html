@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <title>MoneyTrack — Ví của tôi</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="../css/nav.css" />
+        <link rel="stylesheet" href="../css/wallet.css" />
+    </head>
+    <body>
+        <div class="shell">
+            <div id="nav-container"></div>
+            <div class="main">
+                <header class="topbar">
+                    <div class="title">
+                        <h2>Ví của tôi</h2>
+                        <div id="current-date"></div>
+                    </div>
+                    <div class="tb-right">
+                        <button
+                            class="filter-btn"
+                            id="filter-toggle-btn"
+                            onclick="toggleFilterPanel()"
+                        >
+                            <i class="ti ti-adjustments-horizontal"></i>
+                        </button>
+                        <button class="btn-add" onclick="openAdd()">
+                            <i class="ti ti-plus"></i>
+                            <span> Thêm ví </span>
+                        </button>
+                    </div>
+                </header>
+                <div id="toast-area" class="toast-area"></div>
+                <main class="content">
+                    <div id="filter-panel" class="filter-panel">
+                        <input
+                            type="text"
+                            id="q"
+                            placeholder="Tìm kiếm..."
+                            oninput="
+                                render();
+                                updateFilterBadge();
+                            "
+                        />
+                        <select
+                            id="fcat"
+                            onchange="
+                                render();
+                                updateFilterBadge();
+                            "
+                        >
+                            <option value="">Tất cả loại</option>
+                            <option value="salary">Lương</option>
+                            <option value="freelance">Freelance</option>
+                            <option value="investment">Đầu tư</option>
+                            <option value="bonus">Thưởng</option>
+                            <option value="other">Khác</option>
+                        </select>
+                        <select id="fsort" onchange="render()">
+                            <option value="date-desc">Mới nhất</option>
+                            <option value="amt-desc">Cao nhất</option>
+                            <option value="amt-asc">Thấp nhất</option>
+                            <option value="name-asc">A → Z</option>
+                        </select>
+                    </div>
+                    <div class="summary">
+                        <div class="sm">
+                            <div class="sm-lbl">
+                                <i class="ti ti-wallet"></i>
+                                Tổng thu
+                            </div>
+                            <div class="sm-val" id="s-total">—</div>
+                            <div class="sm-sub" id="s-cnt">—</div>
+                        </div>
+                        <div class="sm">
+                            <div class="sm-lbl">
+                                <i class="ti ti-trending-up"></i>
+                                Cao nhất
+                            </div>
+                            <div class="sm-val" id="s-max">—</div>
+                            <div class="sm-sub" id="s-max-name">—</div>
+                        </div>
+                        <div class="sm">
+                            <div class="sm-lbl">
+                                <i class="ti ti-calculator"></i>
+                                Trung bình
+                            </div>
+                            <div class="sm-val" id="s-avg">—</div>
+                        </div>
+                        <div class="sm">
+                            <div class="sm-lbl">
+                                <i class="ti ti-calendar"></i>
+                                Tháng này
+                            </div>
+                            <div class="sm-val" id="s-month">—</div>
+                            <div class="sm-sub" id="s-month-cnt">—</div>
+                        </div>
+                    </div>
+                    <div id="grid" class="cards-grid"></div>
+                </main>
+                <div id="modal-area"></div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") {
+                    closeModal();
+                }
+            });
+        </script>
+        <script src="../api/home.js"></script>
+        <script src="../api/wallet.js"></script>
+        <script>
+            fetch("../nav.html")
+                .then((res) => res.text())
+                .then((data) => {
+                    document.getElementById("nav-container").innerHTML = data;
+                    if (typeof loadUser === "function") {
+                        loadUser();
+                    }
+                });
+        </script>
+    </body>
+</html>

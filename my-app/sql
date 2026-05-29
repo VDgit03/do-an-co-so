@@ -30,10 +30,19 @@ CREATE TABLE categories (
 CREATE TABLE wallets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    type ENUM('income', 'saving') NOT NULL,
-    balance DECIMAL(15,2) DEFAULT 0,
+    name VARCHAR(255) NOT NULL,
+    type ENUM(
+        'salary',
+        'freelance',
+        'investment',
+        'bonus',
+        'other'
+    ) NOT NULL DEFAULT 'salary',
+    amount DECIMAL(15,2) NOT NULL,
+    note TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE

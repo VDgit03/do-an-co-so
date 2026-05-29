@@ -5,6 +5,7 @@ import cateRoutes from "./routes/cateRoutes.js"
 import budgetRoutes from "./routes/budgetRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import goalRoutes from "./routes/goalsRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js"
 
 import forgotRoutes
     from "./routes/forgotRoutes.js";
@@ -21,6 +22,7 @@ app.use("/api/budget", budgetRoutes);
 app.use("/api/forget", forgotRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/goals", goalRoutes);
+app.use("/api/wallet", walletRoutes);
 app.listen(3000, () => {
     console.log("Server chạy tại http://localhost:3000");
 });

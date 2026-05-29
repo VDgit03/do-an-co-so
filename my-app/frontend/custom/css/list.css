@@ -80,7 +80,7 @@ main {
 }
 .mnav-btn {
     width: 26px;
-    height: 26px;
+    height: 34px;
     border: none;
     background: none;
     color: var(--text-2);
@@ -105,7 +105,7 @@ main {
     text-align: center;
 }
 .btn-add {
-     padding: 11px 18px;
+    padding: 11px 18px;
     border-radius: 16px;
     border: 2px solid #ccc;
     background: white;
