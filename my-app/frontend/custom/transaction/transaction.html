@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lịch sử giao dịch — MoneyTrack</title>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link rel="stylesheet" href="../css/nav.css" />
+        <link rel="stylesheet" href="../css/transaction.css" />
+    </head>
+    <body>
+        <div class="app">
+            <div id="nav-container"></div>
+            <div class="main">
+                <!-- TOPBAR -->
+                <header class="topbar">
+                    <div class="topbar-title">
+                        <h2>Lịch sử giao dịch</h2>
+                        <div id="current-date"></div>
+                    </div>
+
+                    <div class="topbar-actions">
+                        <div class="btn-icon" id="filterBtn" title="Bộ lọc">
+                            <i class="ti ti-adjustments-horizontal"></i>
+                            <div class="filter-badge" id="filterBadge"></div>
+                        </div>
+
+                        <button class="btn-primary" id="btnOpenModal">
+                            <i class="ti ti-plus"></i>Thêm giao dịch
+                        </button>
+
+                        <!-- Filter dropdown -->
+                        <div class="filter-dropdown" id="filterDrop">
+                            <div class="fd-header">
+                                <span class="fd-title">Bộ lọc</span>
+                                <button class="fd-clear" id="fdClear">
+                                    Xóa tất cả
+                                </button>
+                            </div>
+
+                            <label class="fd-label">Tháng</label>
+                            <select class="fd-select" id="fdMonth">
+                                <option value="">Tất cả tháng</option>
+                                <option value="5" selected>
+                                    Tháng 5, 2026
+                                </option>
+                                <option value="4">Tháng 4, 2026</option>
+                                <option value="3">Tháng 3, 2026</option>
+                            </select>
+
+                            <label class="fd-label">Danh mục</label>
+
+                            <select class="fd-select" id="fdCat">
+                                <option value="">Tất cả danh mục</option>
+                            </select>
+
+                            <label class="fd-label">Loại</label>
+                            <select class="fd-select" id="fdType">
+                                <option value="">Tất cả loại</option>
+                                <option value="income">Thu nhập</option>
+                                <option value="expense">Chi tiêu</option>
+                            </select>
+
+                            <button class="fd-apply" id="fdApply">
+                                Áp dụng
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- SUB-HEADER -->
+                <div class="sub-header">
+                    <div class="search-wrap">
+                        <i class="ti ti-search search-icon"></i>
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Tìm giao dịch..."
+                        />
+                    </div>
+                    <div class="tags-row" id="tagsRow"></div>
+                </div>
+                <div class="bulk-bar hidden" id="bulkBar">
+                    <div class="bulk-left">
+                        <i class="ti ti-check"></i>
+                        <span id="selectedCount">0</span> giao dịch được chọn
+                    </div>
+
+                    <div class="bulk-actions">
+                        <button class="btn-light" id="clearSelected">
+                            Bỏ chọn
+                        </button>
+
+                        <button class="btn-danger" id="deleteSelected">
+                            <i class="ti ti-trash"></i>
+                            Xóa đã chọn
+                        </button>
+                    </div>
+                </div>
+                <!-- CONTENT -->
+                <main class="content">
+                    <div class="table-card">
+                        <div class="table-head">
+                            <div class="th th-check">
+                                <input type="checkbox" id="checkAll" />
+                            </div>
+
+                            <div class="th">Mô tả</div>
+                            <div class="th">Danh mục</div>
+                            <div class="th">Ngày</div>
+
+                            <div class="th" style="text-align: right">
+                                Số tiền
+                            </div>
+
+                            <div class="th" style="text-align: center">
+                                Loại
+                            </div>
+
+                            <div class="th th-action"></div>
+                        </div>
+                        <div id="txnList"></div>
+                    </div>
+
+                    <div class="pagination">
+                        <div class="pag-size">
+                            Hiển thị
+                            <select id="pageSize">
+                                <option value="5" selected>5</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                            </select>
+                            / trang
+                        </div>
+                        <div class="pag-info" id="pagInfo"></div>
+                        <div class="pag-buttons" id="pagBtns"></div>
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        <!-- ── MODAL ─────────────────────────────────────── -->
+        <div class="overlay" id="overlay">
+            <div
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modalTitle"
+            >
+                <!-- Step 1: choose type -->
+                <div id="step1">
+                    <div class="step-choose">
+                        <h2>Thêm giao dịch</h2>
+                        <p>Chọn loại giao dịch bạn muốn ghi lại</p>
+                        <div class="type-cards">
+                            <div class="type-card income" data-type="income">
+                                <div class="type-card-icon">
+                                    <i class="ti ti-arrow-bar-down"></i>
+                                </div>
+                                <div class="type-card-name">Thu nhập</div>
+                                <div class="type-card-desc">
+                                    Lương, thưởng, freelance...
+                                </div>
+                            </div>
+                            <div class="type-card expense" data-type="expense">
+                                <div class="type-card-icon">
+                                    <i class="ti ti-arrow-bar-up"></i>
+                                </div>
+                                <div class="type-card-name">Chi tiêu</div>
+                                <div class="type-card-desc">
+                                    Ăn uống, mua sắm, hóa đơn...
+                                </div>
+                            </div>
+                        </div>
+                        <div class="choose-footer">
+                            <button class="btn-cancel" id="btnCancelStep1">
+                                Huỷ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: form -->
+                <div id="step2" class="step-form">
+                    <div class="modal-header" id="modalHeader">
+                        <div class="modal-header-inner">
+                            <div class="modal-header-left">
+                                <div class="modal-header-icon">
+                                    <i
+                                        id="modalHeaderIcon"
+                                        class="ti ti-arrow-bar-down"
+                                    ></i>
+                                </div>
+                                <span class="modal-header-title" id="modalTitle"
+                                    >Thêm thu nhập</span
+                                >
+                            </div>
+                            <div class="modal-header-actions">
+                                <button class="btn-back" id="btnBack">
+                                    <i class="ti ti-arrow-left"></i> Quay lại
+                                </button>
+                                <button
+                                    class="btn-close"
+                                    id="btnClose"
+                                    aria-label="Đóng"
+                                >
+                                    <i class="ti ti-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" id="modalBody"></div>
+
+                    <div class="modal-footer">
+                        <button class="btn-cancel" id="btnCancelStep2">
+                            Huỷ
+                        </button>
+                        <button class="btn-save income" id="btnSave">
+                            <i class="ti ti-check"></i> Lưu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <script src="../api/home.js"></script>
+        <script src="../api/transaction.js"></script>
+        <script src="../api/wallet.js"></script>
+        <script>
+            fetch("../nav.html")
+                .then((res) => res.text())
+                .then((data) => {
+                    document.getElementById("nav-container").innerHTML = data;
+                    if (typeof loadUser === "function") {
+                        loadUser();
+                    }
+                });
+        </script>
+    </body>
+</html>
