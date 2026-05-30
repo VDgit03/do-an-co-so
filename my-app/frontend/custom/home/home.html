@@ -1,143 +1,353 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../css/nav.css" />
-    <link rel="stylesheet" href="../css/AI.css">
-    <link rel="stylesheet" href="../css/home.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <title>Money Track</title>
-</head>
+        <title>Money Track</title>
 
-<body>
-    <div class="home">
-        <div id="nav-container"></div>
-        <main>
-            <header class="header">
-                <div>
-                    <h2>Trang chủ</h2>
-                    <div id="current-date"></div>
-                </div>
-                <div class="top-actions">
-                    <button class="btn">
-                        <i class="fa-regular fa-bell"></i>
-                    </button>
+        <!-- CSS -->
+        <link rel="stylesheet" href="../css/nav.css" />
 
-                    <button class="btn">
-                        <i class="fa-solid fa-plus"></i>
-                        Thêm giao dịch
-                    </button>
-                </div>
-            </header>
-            <div class="content">
+        <link rel="stylesheet" href="../css/home.css" />
 
-                <!-- chat -->
-                <div class="quick-banner">
-                    <h3>Hôm nay bạn có tiêu gì ko</h3>
-                    <p>Ghi nhanh một khoản chi tiêu hoặc thu nhập mới</p>
-                    <div class="quick-input-row">
-                        <input class="quick-input" id="quick-input" type="text"
-                            placeholder="VD: Ăn trưa 50k, hoặc để AI phân loại giúp..."
-                            onkeydown="if(event.key==='Enter') submitQuick()">
-                        <button class="btn-quick" onclick="submitQuick()">
-                            <span class="pending-dot" id="pending-dot"></span>
-                            Nhập nhanh
+        <link rel="stylesheet" href="../css/AI.css" />
+
+        <link rel="stylesheet" href="../css/transaction.css" />
+
+        <!-- ICON -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+        />
+    </head>
+
+    <body>
+        <!-- TOAST -->
+        <div class="toast-area" id="toastArea"></div>
+
+        <div class="home">
+            <!-- NAV -->
+            <div id="nav-container"></div>
+
+            <!-- MAIN -->
+            <main class="main">
+                <!-- HEADER -->
+                <header class="header">
+                    <div>
+                        <h2>Trang chủ</h2>
+
+                        <div id="current-date"></div>
+                    </div>
+
+                    <div class="top-actions">
+                        <button class="btn">
+                            <i class="fa-regular fa-bell"></i>
+                        </button>
+
+                        <button class="btn" id="btnOpenModal">
+                            <i class="fa-solid fa-plus"></i>
+                            Thêm giao dịch
                         </button>
                     </div>
-                    <div class="ai-hint">
-                        AI sẽ phân loại danh mục, tạo tiết kiệm, và hỏi thêm nếu cần
+                </header>
+
+                <!-- CONTENT -->
+                <div class="content">
+                    <!-- QUICK INPUT -->
+                    <div class="quick-banner">
+                        <h3>Hôm nay bạn có tiêu gì ko</h3>
+
+                        <p>Ghi nhanh một khoản chi tiêu hoặc thu nhập mới</p>
+
+                        <div class="quick-input-row">
+                            <input
+                                class="quick-input"
+                                id="quick-input"
+                                type="text"
+                                placeholder="VD: Ăn trưa 50k..."
+                                onkeydown="
+                                    if (event.key === 'Enter') {
+                                        submitQuick();
+                                    }
+                                "
+                            />
+
+                            <button class="btn-quick" onclick="submitQuick()">
+                                <span
+                                    class="pending-dot"
+                                    id="pending-dot"
+                                ></span>
+
+                                Nhập nhanh
+                            </button>
+                        </div>
+
+                        <div class="ai-hint">AI sẽ phân loại tự động</div>
                     </div>
-                </div>
 
-                <!-- AI CHAT -->
-                <div class="AI">
-                    <div class="chat-drawer" id="chat-drawer">
+                    <!-- AI CHAT -->
+                    <div class="AI">
+                        <div class="chat-drawer" id="chat-drawer">
+                            <div class="chat-header">
+                                <div class="msg-avatar">🤖</div>
 
-                        <div class="chat-header">
-                            <div class="msg-avatar">🤖</div>
+                                <div class="chat-header-info">
+                                    <h3>Trợ lý Money Track</h3>
 
-                            <div class="chat-header-info">
-                                <h3>Trợ lý Money Track</h3>
-                                <p>Phân loại tự động · Ghi nhanh</p>
+                                    <p>Phân loại tự động</p>
+                                </div>
+
+                                <button
+                                    class="chat-close"
+                                    onclick="closeChat()"
+                                >
+                                    ✕
+                                </button>
                             </div>
 
-                            <button class="chat-close" onclick="closeChat()">✕</button>
+                            <!-- draft -->
+                            <div class="draft-bar" id="draft-bar">
+                                <span>
+                                    Giao dịch
+                                    <strong id="draft-desc"></strong>
+                                    chưa hoàn tất
+                                </span>
+
+                                <button
+                                    class="draft-discard"
+                                    onclick="discardDraft()"
+                                >
+                                    Xoá nháp
+                                </button>
+                            </div>
+
+                            <!-- messages -->
+                            <div class="chat-messages" id="chat-messages"></div>
+
+                            <!-- chips -->
+                            <div class="chips" id="chips"></div>
+
+                            <!-- input -->
+                            <div class="chat-input-area">
+                                <textarea
+                                    class="chat-textarea"
+                                    id="chat-input"
+                                    rows="1"
+                                    placeholder="Nhắn gì đó..."
+                                    onkeydown="handleKey(event)"
+                                    oninput="autoResize(this)"
+                                ></textarea>
+
+                                <button
+                                    class="btn-send"
+                                    id="btn-send"
+                                    onclick="sendMessage()"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <line
+                                            x1="22"
+                                            y1="2"
+                                            x2="11"
+                                            y2="13"
+                                        ></line>
+
+                                        <polygon
+                                            points="22 2 15 22 11 13 2 9 22 2"
+                                        ></polygon>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARDS -->
+                    <div class="cards">
+                        <div class="card-income">
+                            <h4>Thu nhập</h4>
                         </div>
 
-                        <div class="draft-bar" id="draft-bar">
-                            <span>Giao dịch <strong id="draft-desc"></strong> chưa hoàn tất</span>
-                            <button class="draft-discard" onclick="discardDraft()">Xoá nháp</button>
+                        <div class="card-expense">
+                            <h4>Chi tiêu</h4>
                         </div>
 
-                        <div class="chat-messages" id="chat-messages"></div>
+                        <div class="card-saving">
+                            <h4>Tiết kiệm</h4>
+                        </div>
 
-                        <!-- Suggestion chips -->
-                        <div class="chips" id="chips"></div>
+                        <div class="card-wallet">
+                            <h4>Số dư ví</h4>
+                        </div>
+                    </div>
 
-                        <div class="chat-input-area">
-                            <textarea class="chat-textarea" id="chat-input" rows="1" placeholder="Nhắn gì đó..."
-                                onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-                            <button class="btn-send" id="btn-send" onclick="sendMessage()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
+                    <!-- GENERAL -->
+                    <div class="general">
+                        <!-- transaction -->
+                        <div class="box">
+                            <div class="box-header">
+                                <h3>Giao dịch gần đây</h3>
+
+                                <a
+                                    href="/frontend/custom/transaction/transaction.html"
+                                >
+                                    Xem tất cả
+                                </a>
+                            </div>
+
+                            <div id="recentTransactions"></div>
+                        </div>
+
+                        <!-- report -->
+                        <div class="box">
+                            <div class="box-header">
+                                <h3>Chi tiêu theo danh mục</h3>
+
+                                <a href="/frontend/custom/report/report.html">
+                                    Báo cáo
+                                </a>
+                            </div>
+
+                            <div id="reportChart"></div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- MODAL -->
+        <div class="overlay" id="overlay">
+            <div
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="modalTitle"
+            >
+                <!-- STEP 1 -->
+                <div id="step1">
+                    <div class="step-choose">
+                        <h2>Thêm giao dịch</h2>
+
+                        <p>Chọn loại giao dịch bạn muốn ghi lại</p>
+
+                        <div class="type-cards">
+                            <!-- income -->
+                            <div class="type-card income" data-type="income">
+                                <div class="type-card-icon">
+                                    <i class="ti ti-arrow-bar-down"></i>
+                                </div>
+
+                                <div class="type-card-name">Thu nhập</div>
+
+                                <div class="type-card-desc">
+                                    Lương, thưởng, freelance...
+                                </div>
+                            </div>
+
+                            <!-- expense -->
+                            <div class="type-card expense" data-type="expense">
+                                <div class="type-card-icon">
+                                    <i class="ti ti-arrow-bar-up"></i>
+                                </div>
+
+                                <div class="type-card-name">Chi tiêu</div>
+
+                                <div class="type-card-desc">
+                                    Ăn uống, mua sắm, hóa đơn...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="choose-footer">
+                            <button class="btn-cancel" id="btnCancelStep1">
+                                Huỷ
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- cards -->
-                <div class="cards">
-                    <div class="card-income">
-                        <h4>Thu nhập</h4>
-                    </div>
-                    <div class="card-expense">
-                        <h4>Chi tiêu</h4>
-                    </div>
-                    <div class="card-saving">
-                        <h4>Tiết kiệm</h4>
-                    </div>
-                    <div class="card-wallet">
-                        <h4>Số dư ví</h4>
-                    </div>
-                </div>
+                <!-- STEP 2 -->
+                <div id="step2" class="step-form">
+                    <div class="modal-header" id="modalHeader">
+                        <div class="modal-header-inner">
+                            <div class="modal-header-left">
+                                <div class="modal-header-icon">
+                                    <i
+                                        id="modalHeaderIcon"
+                                        class="ti ti-arrow-bar-up"
+                                    ></i>
+                                </div>
 
-                <!-- general -->
-                <div class="general">
-                    <div class="box">
-                        <div class="box-header">
-                            <h3>Giao dịch gần đây</h3>
-                            <a href="/frontend/custom/transaction/transaction.html">Xem tất cả</a>
+                                <span
+                                    class="modal-header-title"
+                                    id="modalTitle"
+                                >
+                                    Thêm thu nhập
+                                </span>
+                            </div>
+
+                            <div class="modal-header-actions">
+                                <button class="btn-back" id="btnBack">
+                                    <i class="ti ti-arrow-left"></i>
+
+                                    Quay lại
+                                </button>
+
+                                <button class="btn-close" id="btnClose">
+                                    <i class="ti ti-x"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="box">
-                        <div class="box-header">
-                            <h3>Chi tiêu theo danh mục</h3>
-                            <a href="/frontend/custom/report/report.html">Báo cáo</a>
-                        </div>
+                    <!-- FORM -->
+                    <div class="modal-body" id="modalBody"></div>
+
+                    <!-- FOOTER -->
+                    <div class="modal-footer">
+                        <button class="btn-cancel" id="btnCancelStep2">
+                            Huỷ
+                        </button>
+
+                        <button class="btn-save income" id="btnSave">
+                            <i class="ti ti-check"></i>
+                            Lưu
+                        </button>
                     </div>
                 </div>
             </div>
-        </main>
-    </div>
-    <script src="../api/AI.js"></script>
-</body>
+        </div>
 
-<script src="../api/home.js"></script>
-<script>
-    fetch("../nav.html")
-        .then((res) => res.text())
-        .then((data) => {
-            document.getElementById("nav-container").innerHTML = data;
-            loadUser();
-        });
-</script>
+        <!-- SCRIPT -->
+        <script src="../api/home.js"></script>
+        <script src="../api/function.js"></script>
+        <script src="../api/AI.js"></script>
 
+        <!-- NAV -->
+        <script>
+            fetch("../nav.html")
+                .then((res) => res.text())
+                .then((data) => {
+                    document.getElementById("nav-container").innerHTML = data;
 
+                    if (typeof loadUser === "function") {
+                        loadUser();
+                    }
+                });
+        </script>
+    </body>
 </html>

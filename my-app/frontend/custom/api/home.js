@@ -1,28 +1,20 @@
 const API_URL = "http://localhost:3000/api";
 
-const USER_ID =
-    localStorage.getItem("userId");
+const USER_ID = localStorage.getItem("userId");
 
 let activeType = "expense";
 
 let wallets = [];
 let categories = [];
 
-// ======================
 // load data
-// ======================
-
 async function loadWallets() {
     try {
         const res = await fetch(
             `${API_URL}/wallet/user/${USER_ID}`
         );
-
-        const data =
-            await res.json();
-
-        wallets =
-            data.wallets || [];
+        const data = await res.json();
+        wallets = data.wallets || [];
     } catch (err) {
         console.error(err);
     }
@@ -33,30 +25,19 @@ async function loadCategories(
     year
 ) {
     try {
-
         // mặc định tháng hiện tại
         if (!month || !year) {
-
-            const now =
-                new Date();
-
-            month =
-                now.getMonth() + 1;
-
-            year =
-                now.getFullYear();
+            const now = new Date();
+            month = now.getMonth() + 1;
+            year = now.getFullYear();
         }
 
         const res = await fetch(
             `${API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
         );
 
-        const data =
-            await res.json();
-
-        categories =
-            data.categories || [];
-
+        const data = await res.json();
+        categories = data.categories || [];
     } catch (err) {
         console.error(err);
     }
@@ -66,42 +47,19 @@ async function loadCategories(
 document.addEventListener(
     "change",
     async (e) => {
-
         if (e.target.id === "fDate") {
 
             // lưu dữ liệu cũ
-            const amount =
-                document.getElementById(
-                    "fAmount"
-                )?.value || "";
-
-            const title =
-                document.getElementById(
-                    "fTitle"
-                )?.value || "";
-
-            const note =
-                document.getElementById(
-                    "fNote"
-                )?.value || "";
+            const amount = document.getElementById("fAmount")?.value || "";
+            const title = document.getElementById("fTitle")?.value || "";
+            const note = document.getElementById("fNote")?.value || "";
 
             // category đang chọn
-            const selected =
-                document.getElementById(
-                    "fSelect"
-                )?.value || "";
-
-            const date =
-                e.target.value;
-
-            const d =
-                new Date(date);
-
-            const month =
-                d.getMonth() + 1;
-
-            const year =
-                d.getFullYear();
+            const selected = document.getElementById("fSelect")?.value || "";
+            const date = e.target.value;
+            const d = new Date(date);
+            const month = d.getMonth() + 1;
+            const year = d.getFullYear();
 
             // reload category theo tháng
             await loadCategories(
@@ -110,54 +68,28 @@ document.addEventListener(
             );
 
             // render lại form
-            document.getElementById(
-                "modalBody"
-            ).innerHTML =
-                buildForm(activeType);
+            document.getElementById("modalBody").innerHTML = buildForm(activeType);
 
             // restore dữ liệu cũ
-            document.getElementById(
-                "fAmount"
-            ).value = amount;
-
-            document.getElementById(
-                "fTitle"
-            ).value = title;
-
-            document.getElementById(
-                "fNote"
-            ).value = note;
-
-            document.getElementById(
-                "fDate"
-            ).value = date;
+            document.getElementById("fAmount").value = amount;
+            document.getElementById("fTitle").value = title;
+            document.getElementById("fNote").value = note;
+            document.getElementById("fDate").value = date;
 
             // restore category cũ nếu còn tồn tại
-            const select =
-                document.getElementById(
-                    "fSelect"
-                );
-
-            const exists =
-                [...select.options]
-                .some(
+            const select = document.getElementById("fSelect");
+            const exists = [...select.options].some(
                     o =>
-                        o.value ===
-                        selected
+                        o.value === selected
                 );
-
             if (exists) {
-                select.value =
-                    selected;
+                select.value = selected;
             }
         }
     }
 );
 
-// ======================
 // helper
-// ======================
-
 function buildOptions(
     arr,
     placeholder
@@ -166,7 +98,6 @@ function buildOptions(
         <option value="">
             ${placeholder}
         </option>
-
         ${arr
             .map(
                 item => `
@@ -181,7 +112,6 @@ function buildOptions(
 
 function getToday() {
     const now = new Date();
-
     const pad = n =>
         String(n).padStart(2, "0");
 
@@ -190,167 +120,96 @@ function getToday() {
     )}-${pad(now.getDate())}`;
 }
 
-// ======================
 // modal
-// ======================
-
 function openModal() {
-    const overlay =
-        document.getElementById(
-            "overlay"
-        );
-
+    const overlay = document.getElementById("overlay");
     if (!overlay) return;
-
-    overlay.classList.add(
-        "open"
-    );
-
+    overlay.classList.add("open");
     showStep1();
 }
 
 function closeModal() {
-    const overlay =
-        document.getElementById(
-            "overlay"
-        );
-
+    const overlay =document.getElementById("overlay");
     if (!overlay) return;
-
-    overlay.classList.remove(
-        "open"
-    );
+    overlay.classList.remove("open");
 }
 
 function showStep1() {
-    document.getElementById(
-        "step1"
-    ).style.display = "block";
-
-    document
-        .getElementById(
-            "step2"
-        )
-        .classList.remove(
-            "show"
-        );
+    document.getElementById("step1").style.display = "block";
+    document.getElementById("step2").classList.remove("show");
 }
 
 function showStep2(type) {
-
     activeType = type;
+    document.getElementById("step1").style.display = "none";
+    document.getElementById("step2").classList.add("show");
 
-    document.getElementById(
-        "step1"
-    ).style.display = "none";
-
-    document
-        .getElementById(
-            "step2"
-        )
-        .classList.add("show");
-
-    // ===== HEADER =====
-    const header =
-        document.getElementById(
-            "modalHeader"
-        );
-
+    // header
+    const header = document.getElementById("modalHeader");
     header.classList.remove(
         "income",
         "expense"
     );
-
     header.classList.add(type);
 
-    // ===== TITLE =====
+    // title
     document.getElementById(
         "modalTitle"
-    ).textContent =
-        type === "income"
-            ? "Thêm thu nhập"
-            : "Thêm chi tiêu";
+    ).textContent = type === "income"
+        ? "Thêm thu nhập"
+        : "Thêm chi tiêu";
 
-    // ===== ICON =====
-    const icon =
-        document.getElementById(
-            "modalHeaderIcon"
-        );
+    // icon
+    const icon = document.getElementById("modalHeaderIcon");
 
-    icon.className =
-        type === "income"
-            ? "ti ti-arrow-bar-down"
-            : "ti ti-arrow-bar-up";
+    icon.className = type === "income"
+        ? "ti ti-arrow-bar-down"
+        : "ti ti-arrow-bar-up";
 
-    // ===== BUTTON SAVE =====
-    const btnSave =
-        document.getElementById(
-            "btnSave"
-        );
-
+    // button save
+    const btnSave = document.getElementById("btnSave");
     btnSave.classList.remove(
         "income",
         "expense"
     );
-
     btnSave.classList.add(type);
 
-    // ===== RENDER FORM =====
+    // render
     document.getElementById(
         "modalBody"
     ).innerHTML =
         buildForm(type);
 }
 
+// tbao
 function showToast(
     message,
     type = "success"
 ) {
-    const area =
-        document.getElementById(
-            "toastArea"
-        );
+    const area = document.getElementById("toastArea");
 
     if (!area) return;
-
-    const toast =
-        document.createElement("div");
-
-    toast.className =
-        `toast t-${type}`;
-
-    toast.textContent =
-        message;
-
+    const toast = document.createElement("div");
+    toast.className = `toast t-${type}`;
+    toast.textContent = message;
     area.appendChild(toast);
-
     setTimeout(() => {
-
-        toast.style.opacity =
-            "0";
-
-        toast.style.transform =
-            "translateX(120%)";
-
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(120%)";
         setTimeout(() => {
             toast.remove();
         }, 400);
-
     }, 2500);
 }
-// ======================
-// form
-// ======================
 
+// form
 function buildForm(type) {
-    const selectField =
-        type === "income"
+    const selectField = type === "income"
             ? `
         <div>
             <label class="form-label">
                 Ví nhận
             </label>
-
             <select
                 class="form-select"
                 id="fSelect"
@@ -379,40 +238,33 @@ function buildForm(type) {
             </select>
         </div>
     `;
-
     return `
         <div class="form-group">
             <label class="form-label">
                 Số tiền
             </label>
-
             <input
                 type="number"
                 class="form-input"
                 id="fAmount"
             >
         </div>
-
         <div class="form-group">
             <label class="form-label">
                 Tiêu đề
             </label>
-
             <input
                 type="text"
                 class="form-input"
                 id="fTitle"
             >
         </div>
-
         <div class="form-row">
             ${selectField}
-
             <div>
                 <label class="form-label">
                     Ngày
                 </label>
-
                 <input
                     type="date"
                     class="form-input"
@@ -421,7 +273,6 @@ function buildForm(type) {
                 >
             </div>
         </div>
-
         <div class="form-group">
             <textarea
                 class="form-textarea"
@@ -432,129 +283,81 @@ function buildForm(type) {
     `;
 }
 
-// ======================
-// save
-// ======================
-
+// tạo
 async function saveTransaction() {
-    const amount =
-        Number(
-            document.getElementById(
-                "fAmount"
-            ).value
-        );
-
-    const title =
-        document
-            .getElementById(
-                "fTitle"
-            )
-            .value.trim();
-
-    const selectId =
-        document.getElementById(
-            "fSelect"
-        ).value;
-
+    const amount =Number(document.getElementById("fAmount").value);
+    const title = document.getElementById("fTitle").value.trim();
+    const selectId = document.getElementById("fSelect").value;
     if (!amount || amount <= 0) {
-        return alert(
-            "Nhập số tiền hợp lệ"
-        );
+        return alert("Nhập số tiền hợp lệ");
     }
-
     if (!title) {
-        return alert(
-            "Nhập tiêu đề"
-        );
+        return alert("Nhập tiêu đề");
     }
-
     if (!selectId) {
-        return alert(
-            "Vui lòng chọn"
-        );
+        return alert("Vui lòng chọn");
     }
-
     const payload = {
         user_id: Number(USER_ID),
-
         type: activeType,
-
         amount,
-
         title,
-
         note: document
             .getElementById(
                 "fNote"
             )
             .value.trim(),
-
         transaction_date:
             document.getElementById(
                 "fDate"
             ).value,
     };
 
-    if (
-        activeType === "income"
-    ) {
-        payload.wallet_id =
-            Number(selectId);
+    if (activeType === "income") {
+        payload.wallet_id = Number(selectId);
     } else {
-        payload.category_id =
-            Number(selectId);
+        payload.category_id = Number(selectId);
     }
-
     try {
         const res = await fetch(
             `${API_URL}/transaction`,
             {
                 method: "POST",
-
                 headers: {
                     "Content-Type":
                         "application/json",
                 },
-
                 body: JSON.stringify(
                     payload
                 ),
             }
         );
 
-        const data =
-            await res.json();
-
+        const data = await res.json();
         if (!res.ok) {
             return showToast(
                 data.message,
                 "danger"
             );
         }
-
         showToast(
             activeType === "income"
                 ? "Đã thêm thu nhập"
                 : "Đã thêm chi tiêu",
             "success"
         );
-
         closeModal();
 
         // cập nhật data
         await loadWallets();
-
-        const date =
-            document.getElementById("fDate").value;
-
+        const date = document.getElementById("fDate").value;
         const d = new Date(date);
-
         await loadCategories(
             d.getMonth() + 1,
             d.getFullYear()
         );
 
-        // chờ toast hiện rồi chuyển trang
+        // chuyển trang
         setTimeout(() => {
 
             window.location.href =
@@ -563,27 +366,21 @@ async function saveTransaction() {
         }, 100);
     } catch (err) {
         console.error(err);
-
         showToast(
-    "Có lỗi xảy ra",
-    "danger"
-);
+            "Có lỗi xảy ra",
+            "danger"
+        );
     }
 }
 
-// ======================
 // init
-// ======================
-
 async function initHomeTransaction() {
     await Promise.all([
         loadWallets(),
         loadCategories(),
     ]);
-
     // open
-    const btnOpen =
-        document.getElementById(
+    const btnOpen = document.getElementById(
             "btnOpenModal"
         );
 
@@ -648,7 +445,6 @@ async function initHomeTransaction() {
                 }
             );
         });
-
     // back
     document
         .getElementById(
@@ -659,5 +455,4 @@ async function initHomeTransaction() {
             showStep1
         );
 }
-
 initHomeTransaction();

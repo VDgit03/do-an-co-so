@@ -1,54 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Mục tiêu tiết kiệm</title>
+        <link rel="stylesheet" href="../css/goals.css" />
+        <link rel="stylesheet" href="../css/nav.css" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
+        />
+    </head>
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mục tiêu tiết kiệm</title>
-    <link rel="stylesheet" href="../css/goals.css" />
-    <link rel="stylesheet" href="../css/nav.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-</head>
+    <body>
+        <div class="goal">
+            <div id="nav-container"></div>
+            <main>
+                <header class="header">
+                    <div>
+                        <h2>Mục tiêu tiết kiệm</h2>
+                        <div id="current-date"></div>
+                    </div>
 
-<body>
-    <div class="goal">
-        <div id="nav-container"></div>
-        <main>
-            <header class="header">
-                <div>
-                    <h2>Mục tiêu tiết kiệm</h2>
-                    <div id="current-date"></div>
+                    <div class="btn">
+                        <button class="btn-add" id="btn-open-new">
+                            <i class="ti ti-plus"></i> Thêm mục tiêu
+                        </button>
+                    </div>
+                </header>
+                <div class="grid" id="grid"></div>
+                <!-- ===== OVERLAY / MODAL ===== -->
+                <div class="overlay" id="overlay">
+                    <div class="modal">
+                        <div id="modal-body"></div>
+                    </div>
                 </div>
+            </main>
+        </div>
+        <script src="../api/function.js"></script>
+        <script src="../api/goals.js"></script>
+        <script>
+            fetch("../nav.html")
+                .then((res) => res.text())
+                .then((data) => {
+                    document.getElementById("nav-container").innerHTML = data;
 
-                <div class="btn">
-                    <button class="btn-add" id="btn-open-new">
-                        <i class="ti ti-plus"></i> Thêm mục tiêu
-                    </button>
-                </div>
-            </header>
-            <div class="grid" id="grid"></div>
-            <!-- ===== OVERLAY / MODAL ===== -->
-            <div class="overlay" id="overlay">
-                <div class="modal">
-                    <div id="modal-body"></div>
-                </div>
-            </div>
-        </main>
-    </div>
-    <script src="../api/home.js"></script>
-    <script src="../api/goals.js"></script>
-    <script>
-        fetch("../nav.html")
-            .then((res) => res.text())
-            .then((data) => {
-                document.getElementById("nav-container").innerHTML = data;
-
-                if (typeof loadUser === "function") {
-                    loadUser();
-                }
-            });
-    </script>
-</body>
-
+                    if (typeof loadUser === "function") {
+                        loadUser();
+                    }
+                });
+        </script>
+    </body>
 </html>
