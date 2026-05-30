@@ -1,88 +1,143 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="../css/nav.css" />
-        <link rel="stylesheet" href="../css/home.css" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        />
-        <title>Money Track</title>
-    </head>
 
-    <body>
-        <div class="home">
-            <div id="nav-container"></div>
-            <main>
-                <header class="header">
-                    <div>
-                        <h2>Trang chủ</h2>
-                        <div id="current-date"></div>
-                    </div>
-                    <div class="top-actions">
-                        <button class="btn">
-                            <i class="fa-regular fa-bell"></i>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/nav.css" />
+    <link rel="stylesheet" href="../css/AI.css">
+    <link rel="stylesheet" href="../css/home.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <title>Money Track</title>
+</head>
+
+<body>
+    <div class="home">
+        <div id="nav-container"></div>
+        <main>
+            <header class="header">
+                <div>
+                    <h2>Trang chủ</h2>
+                    <div id="current-date"></div>
+                </div>
+                <div class="top-actions">
+                    <button class="btn">
+                        <i class="fa-regular fa-bell"></i>
+                    </button>
+
+                    <button class="btn">
+                        <i class="fa-solid fa-plus"></i>
+                        Thêm giao dịch
+                    </button>
+                </div>
+            </header>
+            <div class="content">
+
+                <!-- chat -->
+                <div class="quick-banner">
+                    <h3>Hôm nay bạn có tiêu gì ko</h3>
+                    <p>Ghi nhanh một khoản chi tiêu hoặc thu nhập mới</p>
+                    <div class="quick-input-row">
+                        <input class="quick-input" id="quick-input" type="text"
+                            placeholder="VD: Ăn trưa 50k, hoặc để AI phân loại giúp..."
+                            onkeydown="if(event.key==='Enter') submitQuick()">
+                        <button class="btn-quick" onclick="submitQuick()">
+                            <span class="pending-dot" id="pending-dot"></span>
+                            Nhập nhanh
                         </button>
-
-                        <button class="btn">
-                            <i class="fa-solid fa-plus"></i>
-                            Thêm giao dịch
-                        </button>
                     </div>
-                </header>
-                <div class="content">
-                    <!-- chat -->
-                    <div class="quick-box">
-                        <h3>Hôm nay bạn có tiêu gì ko</h3>
-                        <p>Ghi nhanh một khoản chi tiêu hoặc thu nhập mới</p>
-                        <div class="quick-input">
-                            <input type="text" placeholder="Nhập tại đây..." />
-                            <button>Nhập nhanh</button>
-                        </div>
+                    <div class="ai-hint">
+                        AI sẽ phân loại danh mục, tạo tiết kiệm, và hỏi thêm nếu cần
                     </div>
+                </div>
 
-                    <!-- cards -->
-                    <div class="cards">
-                        <div class="card-income"><h4>Thu nhập</h4></div>
-                        <div class="card-expense"><h4>Chi tiêu</h4></div>
-                        <div class="card-saving"><h4>Tiết kiệm</h4></div>
-                        <div class="card-wallet"><h4>Số dư ví</h4></div>
-                    </div>
+                <!-- AI CHAT -->
+                <div class="AI">
+                    <div class="chat-drawer" id="chat-drawer">
 
-                    <!-- general -->
-                    <div class="general">
-                        <div class="box">
-                            <div class="box-header">
-                                <h3>Giao dịch gần đây</h3>
-                                <a
-                                    href="/frontend/custom/transaction/transaction.html"
-                                    >Xem tất cả</a
-                                >
+                        <div class="chat-header">
+                            <div class="msg-avatar">🤖</div>
+
+                            <div class="chat-header-info">
+                                <h3>Trợ lý Money Track</h3>
+                                <p>Phân loại tự động · Ghi nhanh</p>
                             </div>
+
+                            <button class="chat-close" onclick="closeChat()">✕</button>
                         </div>
 
-                        <div class="box">
-                            <div class="box-header">
-                                <h3>Chi tiêu theo danh mục</h3>
-                                <a href="/frontend/custom/list/list.html"
-                                    >Báo cáo</a
-                                >
-                            </div>
+                        <div class="draft-bar" id="draft-bar">
+                            <span>Giao dịch <strong id="draft-desc"></strong> chưa hoàn tất</span>
+                            <button class="draft-discard" onclick="discardDraft()">Xoá nháp</button>
+                        </div>
+
+                        <div class="chat-messages" id="chat-messages"></div>
+
+                        <!-- Suggestion chips -->
+                        <div class="chips" id="chips"></div>
+
+                        <div class="chat-input-area">
+                            <textarea class="chat-textarea" id="chat-input" rows="1" placeholder="Nhắn gì đó..."
+                                onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+                            <button class="btn-send" id="btn-send" onclick="sendMessage()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </main>
-        </div>
-    </body>
-    <script src="../api/home.js"></script>
-    <script>
-        fetch("../nav.html")
-            .then((res) => res.text())
-            .then((data) => {
-                document.getElementById("nav-container").innerHTML = data;
-                loadUser();
-            });
-    </script>
+
+                <!-- cards -->
+                <div class="cards">
+                    <div class="card-income">
+                        <h4>Thu nhập</h4>
+                    </div>
+                    <div class="card-expense">
+                        <h4>Chi tiêu</h4>
+                    </div>
+                    <div class="card-saving">
+                        <h4>Tiết kiệm</h4>
+                    </div>
+                    <div class="card-wallet">
+                        <h4>Số dư ví</h4>
+                    </div>
+                </div>
+
+                <!-- general -->
+                <div class="general">
+                    <div class="box">
+                        <div class="box-header">
+                            <h3>Giao dịch gần đây</h3>
+                            <a href="/frontend/custom/transaction/transaction.html">Xem tất cả</a>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                        <div class="box-header">
+                            <h3>Chi tiêu theo danh mục</h3>
+                            <a href="/frontend/custom/report/report.html">Báo cáo</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../api/AI.js"></script>
+</body>
+
+<script src="../api/home.js"></script>
+<script>
+    fetch("../nav.html")
+        .then((res) => res.text())
+        .then((data) => {
+            document.getElementById("nav-container").innerHTML = data;
+            loadUser();
+        });
+</script>
+
+
 </html>

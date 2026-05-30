@@ -61,8 +61,8 @@ main {
     padding: 24px 28px;
 }
 
-/* quick-box */
-.quick-box {
+/* quick-banner */
+.quick-banner {
     background: #1f64b0;
     color: white;
     border-radius: 24px;
@@ -70,23 +70,23 @@ main {
     margin-bottom: 30px;
 }
 
-.quick-box h3 {
+.quick-banner h3 {
     font-size: 20px;
     margin-bottom: 10px;
 }
 
-.quick-box p {
+.quick-banner p {
     color: #cfe4ff;
     margin-bottom: 25px;
     font-size: 15px;
 }
 
-.quick-input {
+.quick-input-row {
     display: flex;
     gap: 15px;
 }
 
-.quick-input input {
+.quick-input-row input {
     flex: 1;
     padding: 13px;
     border: none;
@@ -95,7 +95,7 @@ main {
     outline: none;
 }
 
-.quick-input button {
+.quick-input-row .btn-quick {
     width: 180px;
     border: none;
     border-radius: 16px;
@@ -105,8 +105,12 @@ main {
     cursor: pointer;
 }
 
-.quick-input button:hover {
+.quick-input-row .btn-quick:hover {
     background-color: #5DA8FF;
+}
+
+.ai-hint {
+    padding-top: 13px;
 }
 
 /* cards */
