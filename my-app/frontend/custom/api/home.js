@@ -1,217 +1,663 @@
-// button user
-function toggleUserMenu() {
-    document.getElementById("userMenu").classList.toggle("show");
-}
-document.addEventListener("click", (e) => {
-    const user = document.querySelector(".user");
-    const menu = document.getElementById("userMenu");
-    if (user && !user.contains(e.target)) {
-        menu.classList.remove("show");
-    }
-});
+const API_URL = "http://localhost:3000/api";
 
-// logout
-function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userId");
-    window.location.href =
-        "../../auth/index.html";
-}
+const USER_ID =
+    localStorage.getItem("userId");
 
-// time
-function updateDateTime() {
-    const now = new Date();
-    const weekdays = [
-        "Chủ nhật",
-        "Thứ 2",
-        "Thứ 3",
-        "Thứ 4",
-        "Thứ 5",
-        "Thứ 6",
-        "Thứ 7"
-    ];
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const text = `${weekdays[now.getDay()]}, ${day} tháng ${month}, ${year}`;
-    document.getElementById("current-date").textContent = text;
-}
-updateDateTime();
-setInterval(updateDateTime, 60000);
+let activeType = "expense";
 
-// username
-async function loadUser() {
+let wallets = [];
+let categories = [];
+
+// ======================
+// load data
+// ======================
+
+async function loadWallets() {
     try {
-        const userId = localStorage.getItem("userId");
-        if (!userId) return;
         const res = await fetch(
-            `http://localhost:3000/api/auth/user/${userId}`
+            `${API_URL}/wallet/user/${USER_ID}`
         );
-        const data = await res.json();
 
-        // username
-        document.getElementById("username")
-            .textContent = data.fullname;
+        const data =
+            await res.json();
 
-        // lần đổi mật khẩu
-        renderLastPasswordChange(
-            data.lastPasswordChange
-        );
+        wallets =
+            data.wallets || [];
     } catch (err) {
         console.error(err);
     }
 }
 
-// last change
-function renderLastPasswordChange(dateString) {
-    const dateEl = document.getElementById(
-        "last-date"
-    );
-    const agoEl = document.getElementById(
-        "last-ago"
-    );
-
-    // không có element thì dừng
-    if (!dateEl || !agoEl) return;
-
-
-    // chưa từng đổi
-    if (!dateString) {
-        dateEl.textContent = "Chưa đổi";
-        agoEl.textContent = "";
-        return;
-    }
-    const date = new Date(dateString);
-
-    // format ngày
-    const formatted =
-        date.toLocaleDateString(
-            "vi-VN",
-            {
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-            }
-        );
-    dateEl.textContent =
-        formatted;
-
-    // tính ngày trước
-    const now = new Date();
-    const diffTime = now - date;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) {
-        agoEl.textContent = "";
-    } else {
-        agoEl.textContent = `${diffDays} ngày trước`;
-    }
-}
-
-// đổi mk
-function changePassword() {
-    window.location.href = "/frontend/custom/home/changepw.html"
-}
-async function handleChangePassword() {
+async function loadCategories(
+    month,
+    year
+) {
     try {
-        const oldPassword = document.getElementById("oldPassword").value;
-        const newPassword = document.getElementById("newPassword").value;
-        const confirmPassword = document.getElementById("confirmPassword").value;
-        const userId = localStorage.getItem("userId");
 
-        // validate
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            alert(
-                "Vui lòng nhập đầy đủ"
-            );
-            return;
+        // mặc định tháng hiện tại
+        if (!month || !year) {
+
+            const now =
+                new Date();
+
+            month =
+                now.getMonth() + 1;
+
+            year =
+                now.getFullYear();
         }
 
-        // confirm password
-        if (
-            newPassword !==
-            confirmPassword
-        ) {
-            alert(
-                "Mật khẩu xác nhận không khớp"
-            );
-            return;
-        }
-
-        // request
         const res = await fetch(
-            "http://localhost:3000/api/auth/changepw",
+            `${API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
+        );
+
+        const data =
+            await res.json();
+
+        categories =
+            data.categories || [];
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// đổi tháng -> reload category
+document.addEventListener(
+    "change",
+    async (e) => {
+
+        if (e.target.id === "fDate") {
+
+            // lưu dữ liệu cũ
+            const amount =
+                document.getElementById(
+                    "fAmount"
+                )?.value || "";
+
+            const title =
+                document.getElementById(
+                    "fTitle"
+                )?.value || "";
+
+            const note =
+                document.getElementById(
+                    "fNote"
+                )?.value || "";
+
+            // category đang chọn
+            const selected =
+                document.getElementById(
+                    "fSelect"
+                )?.value || "";
+
+            const date =
+                e.target.value;
+
+            const d =
+                new Date(date);
+
+            const month =
+                d.getMonth() + 1;
+
+            const year =
+                d.getFullYear();
+
+            // reload category theo tháng
+            await loadCategories(
+                month,
+                year
+            );
+
+            // render lại form
+            document.getElementById(
+                "modalBody"
+            ).innerHTML =
+                buildForm(activeType);
+
+            // restore dữ liệu cũ
+            document.getElementById(
+                "fAmount"
+            ).value = amount;
+
+            document.getElementById(
+                "fTitle"
+            ).value = title;
+
+            document.getElementById(
+                "fNote"
+            ).value = note;
+
+            document.getElementById(
+                "fDate"
+            ).value = date;
+
+            // restore category cũ nếu còn tồn tại
+            const select =
+                document.getElementById(
+                    "fSelect"
+                );
+
+            const exists =
+                [...select.options]
+                .some(
+                    o =>
+                        o.value ===
+                        selected
+                );
+
+            if (exists) {
+                select.value =
+                    selected;
+            }
+        }
+    }
+);
+
+// ======================
+// helper
+// ======================
+
+function buildOptions(
+    arr,
+    placeholder
+) {
+    return `
+        <option value="">
+            ${placeholder}
+        </option>
+
+        ${arr
+            .map(
+                item => `
+            <option value="${item.id}">
+                ${item.name}
+            </option>
+        `
+            )
+            .join("")}
+    `;
+}
+
+function getToday() {
+    const now = new Date();
+
+    const pad = n =>
+        String(n).padStart(2, "0");
+
+    return `${now.getFullYear()}-${pad(
+        now.getMonth() + 1
+    )}-${pad(now.getDate())}`;
+}
+
+// ======================
+// modal
+// ======================
+
+function openModal() {
+    const overlay =
+        document.getElementById(
+            "overlay"
+        );
+
+    if (!overlay) return;
+
+    overlay.classList.add(
+        "open"
+    );
+
+    showStep1();
+}
+
+function closeModal() {
+    const overlay =
+        document.getElementById(
+            "overlay"
+        );
+
+    if (!overlay) return;
+
+    overlay.classList.remove(
+        "open"
+    );
+}
+
+function showStep1() {
+    document.getElementById(
+        "step1"
+    ).style.display = "block";
+
+    document
+        .getElementById(
+            "step2"
+        )
+        .classList.remove(
+            "show"
+        );
+}
+
+function showStep2(type) {
+
+    activeType = type;
+
+    document.getElementById(
+        "step1"
+    ).style.display = "none";
+
+    document
+        .getElementById(
+            "step2"
+        )
+        .classList.add("show");
+
+    // ===== HEADER =====
+    const header =
+        document.getElementById(
+            "modalHeader"
+        );
+
+    header.classList.remove(
+        "income",
+        "expense"
+    );
+
+    header.classList.add(type);
+
+    // ===== TITLE =====
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        type === "income"
+            ? "Thêm thu nhập"
+            : "Thêm chi tiêu";
+
+    // ===== ICON =====
+    const icon =
+        document.getElementById(
+            "modalHeaderIcon"
+        );
+
+    icon.className =
+        type === "income"
+            ? "ti ti-arrow-bar-down"
+            : "ti ti-arrow-bar-up";
+
+    // ===== BUTTON SAVE =====
+    const btnSave =
+        document.getElementById(
+            "btnSave"
+        );
+
+    btnSave.classList.remove(
+        "income",
+        "expense"
+    );
+
+    btnSave.classList.add(type);
+
+    // ===== RENDER FORM =====
+    document.getElementById(
+        "modalBody"
+    ).innerHTML =
+        buildForm(type);
+}
+
+function showToast(
+    message,
+    type = "success"
+) {
+    const area =
+        document.getElementById(
+            "toastArea"
+        );
+
+    if (!area) return;
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast t-${type}`;
+
+    toast.textContent =
+        message;
+
+    area.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.style.opacity =
+            "0";
+
+        toast.style.transform =
+            "translateX(120%)";
+
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+
+    }, 2500);
+}
+// ======================
+// form
+// ======================
+
+function buildForm(type) {
+    const selectField =
+        type === "income"
+            ? `
+        <div>
+            <label class="form-label">
+                Ví nhận
+            </label>
+
+            <select
+                class="form-select"
+                id="fSelect"
+            >
+                ${buildOptions(
+                    wallets,
+                    "Chọn ví"
+                )}
+            </select>
+        </div>
+    `
+            : `
+        <div>
+            <label class="form-label">
+                Danh mục
+            </label>
+
+            <select
+                class="form-select"
+                id="fSelect"
+            >
+                ${buildOptions(
+                    categories,
+                    "Chọn danh mục"
+                )}
+            </select>
+        </div>
+    `;
+
+    return `
+        <div class="form-group">
+            <label class="form-label">
+                Số tiền
+            </label>
+
+            <input
+                type="number"
+                class="form-input"
+                id="fAmount"
+            >
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                Tiêu đề
+            </label>
+
+            <input
+                type="text"
+                class="form-input"
+                id="fTitle"
+            >
+        </div>
+
+        <div class="form-row">
+            ${selectField}
+
+            <div>
+                <label class="form-label">
+                    Ngày
+                </label>
+
+                <input
+                    type="date"
+                    class="form-input"
+                    id="fDate"
+                    value="${getToday()}"
+                >
+            </div>
+        </div>
+
+        <div class="form-group">
+            <textarea
+                class="form-textarea"
+                id="fNote"
+                placeholder="Ghi chú"
+            ></textarea>
+        </div>
+    `;
+}
+
+// ======================
+// save
+// ======================
+
+async function saveTransaction() {
+    const amount =
+        Number(
+            document.getElementById(
+                "fAmount"
+            ).value
+        );
+
+    const title =
+        document
+            .getElementById(
+                "fTitle"
+            )
+            .value.trim();
+
+    const selectId =
+        document.getElementById(
+            "fSelect"
+        ).value;
+
+    if (!amount || amount <= 0) {
+        return alert(
+            "Nhập số tiền hợp lệ"
+        );
+    }
+
+    if (!title) {
+        return alert(
+            "Nhập tiêu đề"
+        );
+    }
+
+    if (!selectId) {
+        return alert(
+            "Vui lòng chọn"
+        );
+    }
+
+    const payload = {
+        user_id: Number(USER_ID),
+
+        type: activeType,
+
+        amount,
+
+        title,
+
+        note: document
+            .getElementById(
+                "fNote"
+            )
+            .value.trim(),
+
+        transaction_date:
+            document.getElementById(
+                "fDate"
+            ).value,
+    };
+
+    if (
+        activeType === "income"
+    ) {
+        payload.wallet_id =
+            Number(selectId);
+    } else {
+        payload.category_id =
+            Number(selectId);
+    }
+
+    try {
+        const res = await fetch(
+            `${API_URL}/transaction`,
             {
-                method: "PUT",
+                method: "POST",
+
                 headers: {
                     "Content-Type":
-                        "application/json"
+                        "application/json",
                 },
-                body: JSON.stringify({
-                    userId,
-                    oldPassword,
-                    newPassword,
-                    confirmPassword
-                })
+
+                body: JSON.stringify(
+                    payload
+                ),
             }
         );
-        const data = await res.json();
 
-        // account google
-        if (data.isGoogle) {
-            document.querySelector(".form").innerHTML =
-                `
-            <h2>
-                Tài khoản Google
-            </h2>
-            <p>
-                Không thể đổi mật khẩu
-            </p>
-            `;
-            return;
-        }
+        const data =
+            await res.json();
 
-        // lỗi
         if (!res.ok) {
-            alert(data.message);
-            return;
+            return showToast(
+                data.message,
+                "danger"
+            );
         }
 
-        // success
-        alert(data.message);
-        window.location.href = "./home.html";
+        showToast(
+            activeType === "income"
+                ? "Đã thêm thu nhập"
+                : "Đã thêm chi tiêu",
+            "success"
+        );
+
+        closeModal();
+
+        // cập nhật data
+        await loadWallets();
+
+        const date =
+            document.getElementById("fDate").value;
+
+        const d = new Date(date);
+
+        await loadCategories(
+            d.getMonth() + 1,
+            d.getFullYear()
+        );
+
+        // chờ toast hiện rồi chuyển trang
+        setTimeout(() => {
+
+            window.location.href =
+                "/frontend/custom/transaction/transaction.html";
+
+        }, 100);
     } catch (err) {
         console.error(err);
+
+        showToast(
+    "Có lỗi xảy ra",
+    "danger"
+);
     }
 }
 
-// xem mật khẩu
-function togglePassword(el) {
-    const wrapper = el.closest(".input");
-    const pw = wrapper.querySelector("input");
-    const icon = el.querySelector("i");
+// ======================
+// init
+// ======================
 
-    if (pw.type === "password") {
-        pw.type = "text";
-        icon.classList.replace("fa-eye", "fa-eye-slash");
-    } else {
-        pw.type = "password";
-        icon.classList.replace("fa-eye-slash", "fa-eye");
+async function initHomeTransaction() {
+    await Promise.all([
+        loadWallets(),
+        loadCategories(),
+    ]);
+
+    // open
+    const btnOpen =
+        document.getElementById(
+            "btnOpenModal"
+        );
+
+    if (btnOpen) {
+        btnOpen.addEventListener(
+            "click",
+            openModal
+        );
     }
+
+    // close
+    document
+        .getElementById(
+            "btnClose"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+    document
+        .getElementById(
+            "btnCancelStep1"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+    document
+        .getElementById(
+            "btnCancelStep2"
+        )
+        ?.addEventListener(
+            "click",
+            closeModal
+        );
+
+    // save
+    document
+        .getElementById(
+            "btnSave"
+        )
+        ?.addEventListener(
+            "click",
+            saveTransaction
+        );
+
+    // type
+    document
+        .querySelectorAll(
+            ".type-card"
+        )
+        .forEach(card => {
+            card.addEventListener(
+                "click",
+                () => {
+                    showStep2(
+                        card.dataset
+                            .type
+                    );
+                }
+            );
+        });
+
+    // back
+    document
+        .getElementById(
+            "btnBack"
+        )
+        ?.addEventListener(
+            "click",
+            showStep1
+        );
 }
-// kiểm tra mk
-function checkStrength(val) {
-    const segs = ['s1', 's2', 's3', 's4'].map(id => document.getElementById(id));
-    const label = document.getElementById('strength-text');
-    segs.forEach(s => { s.style.background = 'rgba(255,255,255,0.1)'; });
-    if (!val) { label.textContent = ''; return; }
-    let score = 0;
-    if (val.length >= 8) score++;
-    if (/[A-Z]/.test(val)) score++;
-    if (/[0-9]/.test(val)) score++;
-    if (/[^A-Za-z0-9]/.test(val)) score++;
-    const colors = ['#E24B4A', '#EF9F27', '#1D9E75', '#4FAAFF'];
-    const labels = ['Rất yếu', 'Trung bình', 'Khá mạnh', 'Rất mạnh'];
-    for (let i = 0; i < score; i++) segs[i].style.background = colors[Math.min(score - 1, 3)];
-    label.textContent = labels[Math.min(score - 1, 3)];
-    label.style.color = colors[Math.min(score - 1, 3)];
-}
+
+initHomeTransaction();
