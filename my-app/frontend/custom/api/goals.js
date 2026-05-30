@@ -1,5 +1,5 @@
 // Ngày hiện tại (thay bằng new Date() khi dùng thực tế)
-const TODAY = new Date(2026, 4, 24); // 24/05/2026
+const TODAY = new Date();
 
 let activeDepId = null; // ID mục tiêu đang nạp tiền
 let selectedCI = 0;    // Màu đang chọn trong form
@@ -289,7 +289,7 @@ function buildGoalForm(g) {
       <div class="field">
         <label>Ngày tạo</label>
         <input type="date" id="f-created"
-               value="${isEdit ? toInputDate(g.created) : today}"
+               value="${isEdit ? toInputDate(g.created) : ''}"
                oninput="updatePreview()"/>
       </div>
       <div class="field">
