@@ -211,7 +211,7 @@ async function sendMessage() {
 
 /* ── CLAUDE API ── */
 async function callClaude(system, messages) {
-    const res = await fetch(API_URL, {
+    const res = await fetch(AI_API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

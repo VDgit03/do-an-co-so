@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const AI_API_URL = "http://localhost:3000/api";
 
 const USER_ID = localStorage.getItem("userId");
 
@@ -8,10 +8,86 @@ let wallets = [];
 let categories = [];
 
 // load data
+async function loadDashboard() {
+    try {
+        const res = await fetch(
+            `${AI_API_URL}/transaction/${USER_ID}`
+        );
+
+        const data = await res.json();
+
+        const transactions = data.transactions || [];
+
+        // tháng hiện tại
+        const now = new Date();
+
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        transactions.forEach(t => {
+            const amount = Number(t.amount);
+
+            // ngày giao dịch
+            const date = new Date(t.transaction_date);
+
+            const month = date.getMonth();
+            const year = date.getFullYear();
+
+            // chỉ lấy giao dịch tháng hiện tại
+            if (
+                month === currentMonth &&
+                year === currentYear
+            ) {
+                if (t.type === "income") {
+                    totalIncome += amount;
+                } else {
+                    totalExpense += amount;
+                }
+            }
+        });
+
+        renderCards(totalIncome, totalExpense);
+
+    } catch (err) {
+        console.error("Lỗi load dashboard:", err);
+    }
+}
+function fmt(n) {
+    return Number(n).toLocaleString("vi-VN") + " ₫";
+}
+function renderWallet(wallets) {
+    const total = wallets.reduce((sum, w) => sum + Number(w.amount || 0), 0);
+
+    document.querySelector(".card-wallet").innerHTML = `
+        <h4>Số dư ví</h4>
+        <div class="value">${fmt(total)}</div>
+    `;
+}
+function renderCards(income, expense) {
+    const saving = income - expense;
+
+    document.querySelector(".card-income").innerHTML = `
+        <h4>Thu nhập</h4>
+        <div class="value">${fmt(income)}</div>
+    `;
+
+    document.querySelector(".card-expense").innerHTML = `
+        <h4>Chi tiêu</h4>
+        <div class="value">${fmt(expense)}</div>
+    `;
+
+    document.querySelector(".card-saving").innerHTML = `
+        <h4>Tiết kiệm</h4>
+        <div class="value">${fmt(saving)}</div>
+    `;
+}
 async function loadWallets() {
     try {
         const res = await fetch(
-            `${API_URL}/wallet/user/${USER_ID}`
+            `${AI_API_URL}/wallet/user/${USER_ID}`
         );
         const data = await res.json();
         wallets = data.wallets || [];
@@ -33,7 +109,7 @@ async function loadCategories(
         }
 
         const res = await fetch(
-            `${API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
+            `${AI_API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
         );
 
         const data = await res.json();
@@ -320,7 +396,7 @@ async function saveTransaction() {
     }
     try {
         const res = await fetch(
-            `${API_URL}/transaction`,
+            `${AI_API_URL}/transaction`,
             {
                 method: "POST",
                 headers: {
@@ -363,7 +439,7 @@ async function saveTransaction() {
             window.location.href =
                 "/frontend/custom/transaction/transaction.html";
 
-        }, 100);
+        }, 500);
     } catch (err) {
         console.error(err);
         showToast(
@@ -374,11 +450,22 @@ async function saveTransaction() {
 }
 
 // init
+async function initHome() {
+    await Promise.all([
+        loadWallets(),
+        loadCategories(),
+        loadDashboard()
+    ]);
+
+    renderWallet(wallets); 
+}
 async function initHomeTransaction() {
     await Promise.all([
         loadWallets(),
         loadCategories(),
+        loadDashboard()
     ]);
+    renderWallet(wallets);
     // open
     const btnOpen = document.getElementById(
             "btnOpenModal"

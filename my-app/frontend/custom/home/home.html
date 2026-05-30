@@ -331,23 +331,22 @@
                 </div>
             </div>
         </div>
-
-        <!-- SCRIPT -->
-        <script src="../api/home.js"></script>
-        <script src="../api/function.js"></script>
-        <script src="../api/AI.js"></script>
-
-        <!-- NAV -->
-        <script>
-            fetch("../nav.html")
-                .then((res) => res.text())
-                .then((data) => {
-                    document.getElementById("nav-container").innerHTML = data;
-
-                    if (typeof loadUser === "function") {
-                        loadUser();
-                    }
-                });
-        </script>
     </body>
+    <!-- SCRIPT -->
+    <script src="../api/home.js"></script>
+    <script src="../api/function.js"></script>
+    <script src="../api/AI.js"></script>
+
+    <!-- NAV -->
+    <script>
+        fetch("../nav.html")
+            .then((res) => res.text())
+            .then((data) => {
+                document.getElementById("nav-container").innerHTML = data;
+
+                if (typeof loadUser === "function") {
+                    loadUser();
+                }
+            });
+    </script>
 </html>
