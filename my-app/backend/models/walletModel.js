@@ -35,7 +35,11 @@ export const createWalletModel = async (
     name,
     type,
     amount,
-    note
+    note,
+
+    icon,
+    bg_color,
+    fg_color
 ) => {
     const [result] = await pool.execute(
         `
@@ -45,16 +49,24 @@ export const createWalletModel = async (
             name,
             type,
             amount,
-            note
+            note,
+
+            icon,
+            bg_color,
+            fg_color
         )
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
             user_id,
             name,
             type,
             amount,
-            note
+            note,
+
+            icon,
+            bg_color,
+            fg_color
         ]
     );
     const [rows] = await pool.execute(
@@ -74,7 +86,11 @@ export const updateWalletModel = async (
     name,
     type,
     amount,
-    note
+    note,
+
+    icon,
+    bg_color,
+    fg_color
 ) => {
     await pool.execute(
         `
@@ -83,7 +99,11 @@ export const updateWalletModel = async (
             name = ?,
             type = ?,
             amount = ?,
-            note = ?
+            note = ?,
+
+            icon = ?,
+            bg_color = ?,
+            fg_color = ?
         WHERE id = ?
         `,
         [
@@ -91,6 +111,10 @@ export const updateWalletModel = async (
             type,
             amount,
             note,
+
+            icon,
+            bg_color,
+            fg_color,
             id
         ]
     );

@@ -50,13 +50,20 @@ export const createWallet = async (
     res
 ) => {
     try {
+
         const {
             user_id,
             name,
             type,
             amount,
-            note
+            note,
+
+            icon,
+            bg_color,
+            fg_color
+
         } = req.body;
+
         if (
             !user_id ||
             !name ||
@@ -67,19 +74,28 @@ export const createWallet = async (
                 message: "Thiếu dữ liệu"
             });
         }
+
         const wallet =
             await createWalletService(
                 user_id,
                 name,
                 type,
                 amount,
-                note
+                note,
+
+                icon,
+                bg_color,
+                fg_color
             );
+
         res.status(201).json({
             wallet
         });
+
     } catch (err) {
+
         console.log(err);
+
         res.status(500).json({
             message: err.message
         });

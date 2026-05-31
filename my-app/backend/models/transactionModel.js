@@ -9,14 +9,39 @@ export async function getTransactionsByMonth(
     const [rows] = await pool.query(
         `
         SELECT 
-            t.*,
-            c.name AS category_name
+            t.id,
+            t.user_id,
+            t.wallet_id,
+            t.category_id,
+            t.type,
+            t.amount,
+            t.title,
+            t.note,
+            t.transaction_date,
+            t.created_at,
+
+            w.name AS wallet_name,
+            w.icon AS wallet_icon,
+            w.bg_color AS wallet_bg,
+            w.fg_color AS wallet_fg,
+
+            c.name AS category_name,
+            c.icon AS category_icon,
+            c.bg_color AS bg_color,
+            c.fg_color AS fg_color
+
         FROM transaction t
+
+        LEFT JOIN wallets w
+            ON t.wallet_id = w.id
+
         LEFT JOIN categories c
-        ON t.category_id = c.id
+            ON t.category_id = c.id
+
         WHERE t.user_id = ?
         AND MONTH(t.transaction_date) = ?
         AND YEAR(t.transaction_date) = ?
+
         ORDER BY t.transaction_date DESC
         `,
         [userId, month, year]
@@ -24,6 +49,7 @@ export async function getTransactionsByMonth(
 
     return rows;
 }
+
 
 
 // lấy all

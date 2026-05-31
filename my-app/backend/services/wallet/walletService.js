@@ -26,14 +26,21 @@ export const createWalletService = async (
     name,
     type,
     amount,
-    note
+    note,
+
+    icon,
+    bg_color,
+    fg_color
 ) => {
     return await createWalletModel(
         user_id,
         name,
         type,
         amount,
-        note
+        note,
+        icon,
+        bg_color,
+        fg_color
     );
 };
 
@@ -43,14 +50,20 @@ export const updateWalletService = async (
     name,
     type,
     amount,
-    note
+    note,
+    icon,
+    bg_color,
+    fg_color
 ) => {
     return await updateWalletModel(
         id,
         name,
         type,
         amount,
-        note
+        note,
+        icon,
+        bg_color,
+        fg_color
     );
 };
 

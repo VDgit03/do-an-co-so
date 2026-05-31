@@ -1,50 +1,52 @@
 import pool from "../config/db.js";
 
 // lấy
-export const getAllCategoriesModel = async (userId, month, year) => {
-  const [rows] = await pool.query(
-    `
-    SELECT
-        c.id,
-        c.name,
-        c.icon,
-        c.bg_color,
-        c.fg_color,
-        COALESCE(b.amount, 0) AS budget,
-        COALESCE(SUM(t.amount), 0) AS spent
+export const getAllCategoriesModel = async (userId) => {
 
-    FROM categories c
+    const [rows] = await pool.query(
+        `
+        SELECT
+            c.id,
+            c.name,
+            c.icon,
+            c.bg_color,
+            c.fg_color,
 
-    INNER JOIN budgets b
-        ON c.id = b.category_id
-        AND b.user_id = ?
-        AND b.month = ?
-        AND b.year = ?
+            COALESCE(b.amount, 0) AS budget,
 
-    LEFT JOIN transaction t
-        ON t.category_id = c.id
-        AND t.user_id = ?
-        AND t.type = 'expense'
-        AND t.transaction_date >= ?
-        AND t.transaction_date < ?
+            COALESCE(SUM(t.amount), 0) AS spent
 
-    WHERE c.user_id = ?
+        FROM categories c
 
-    GROUP BY
-        c.id, c.name, c.icon, c.bg_color, c.fg_color, b.amount
+        LEFT JOIN budgets b
+            ON c.id = b.category_id
+            AND b.user_id = ?
 
-    ORDER BY c.created_at DESC
-    `,
-    [
-      userId, month, year,
-      userId,
-      `${year}-${String(month).padStart(2,'0')}-01`,
-      `${year}-${String(month).padStart(2,'0')}-31`,
-      userId
-    ]
-  );
+        LEFT JOIN transaction t
+            ON t.category_id = c.id
+            AND t.user_id = ?
+            AND t.type = 'expense'
 
-  return rows;
+        WHERE c.user_id = ?
+
+        GROUP BY
+            c.id,
+            c.name,
+            c.icon,
+            c.bg_color,
+            c.fg_color,
+            b.amount
+
+        ORDER BY c.created_at DESC
+        `,
+        [
+            userId,
+            userId,
+            userId
+        ]
+    );
+
+    return rows;
 };
 
 // tạo
