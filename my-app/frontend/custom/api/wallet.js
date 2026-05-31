@@ -37,36 +37,49 @@ let wallets = [];
 const CATEGORIES = {
     salary: {
         label: "Lương",
-        icon: "ti-building-bank",
+        icon: "ti ti-wallet",
         badge: "b-salary",
-        icon_cls: "i-salary"
+        icon_cls: "i-salary",
+        bg: "#e8f5e9",
+        fg: "#2e7d32"
     },
+
     freelance: {
         label: "Freelance",
         icon: "ti-code",
         badge: "b-freelance",
-        icon_cls: "i-freelance"
+        icon_cls: "i-freelance",
+        bg: "#e3f2fd",
+        fg: "#1565c0"
     },
+
     investment: {
         label: "Đầu tư",
         icon: "ti-trending-up",
         badge: "b-investment",
-        icon_cls: "i-invest"
+        icon_cls: "i-invest",
+        bg: "#fff3e0",
+        fg: "#ef6c00"
     },
+
     bonus: {
         label: "Thưởng",
         icon: "ti-gift",
         badge: "b-bonus",
-        icon_cls: "i-bonus"
+        icon_cls: "i-bonus",
+        bg: "#f3e5f5",
+        fg: "#7b1fa2"
     },
+
     other: {
         label: "Khác",
         icon: "ti-box",
         badge: "b-other",
-        icon_cls: "i-other"
+        icon_cls: "i-other",
+        bg: "#eceff1",
+        fg: "#455a64"
     }
 };
-
 // lấy ví
 async function loadWallets() {
 
@@ -321,6 +334,7 @@ async function saveWallet() {
     const type = document.getElementById("f-type").value;
     const amount = document.getElementById("f-amount").value;
     const note = document.getElementById("f-note").value.trim();
+    const cate = CATEGORIES[type];
     if (!name) {
         return toast("Nhập tên ví");
     }
@@ -337,12 +351,16 @@ async function saveWallet() {
                         "application/json"
                 },
                 body: JSON.stringify({
-                    user_id: userId,
-                    name,
-                    type,
-                    amount,
-                    note
-                })
+    user_id: userId,
+    name,
+    type,
+    amount,
+    note,
+
+    icon: cate.icon,
+    bg_color: cate.bg,
+    fg_color: cate.fg
+})
             }
         );
         const data = await res.json();

@@ -193,9 +193,17 @@ function renderTable() {
     `;
   } else {
     list.innerHTML = slice.map(t => {
-        const icon = t.category_icon || 'ti-tag';
-        const bg = t.category_bg || '#eee';
-        const col = t.category_fg || '#333';
+        const icon = t.type === "income"
+          ? (t.wallet_icon || "ti-wallet")
+          : (t.category_icon || "ti-tag");
+
+        const bg = t.type === "income"
+            ? (t.wallet_bg || "#e8f5e9")
+            : (t.category_bg || "#eee");
+
+        const col = t.type === "income"
+            ? (t.wallet_fg || "#2e7d32")
+            : (t.category_fg || "#333"); 
         const amtCls = t.type === 'income'
             ? 'amount-income'
             : 'amount-expense';

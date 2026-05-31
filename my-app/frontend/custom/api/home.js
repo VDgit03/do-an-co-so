@@ -10,37 +10,48 @@ let categories = [];
 // load data
 async function loadDashboard() {
     try {
-        const res = await fetch(
-            `${AI_API_URL}/transaction/${USER_ID}`
-        );
-
-        const data = await res.json();
-
-        const transactions = data.transactions || [];
 
         // tháng hiện tại
         const now = new Date();
 
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        // transactions
+        const transRes = await fetch(
+            `${AI_API_URL}/transaction/${USER_ID}`
+        );
+
+        const transData = await transRes.json();
+
+        const transactions =
+            transData.transactions || [];
+
+        // categories
+        const cateRes = await fetch(
+            `${AI_API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
+        );
+
+        const cateData = await cateRes.json();
+
+        const categories =
+            cateData.categories || [];
 
         let totalIncome = 0;
         let totalExpense = 0;
 
         transactions.forEach(t => {
+
             const amount = Number(t.amount);
 
-            // ngày giao dịch
-            const date = new Date(t.transaction_date);
+            const date =
+                new Date(t.transaction_date);
 
-            const month = date.getMonth();
-            const year = date.getFullYear();
-
-            // chỉ lấy giao dịch tháng hiện tại
             if (
-                month === currentMonth &&
-                year === currentYear
+                date.getMonth() === now.getMonth() &&
+                date.getFullYear() === year
             ) {
+
                 if (t.type === "income") {
                     totalIncome += amount;
                 } else {
@@ -49,15 +60,247 @@ async function loadDashboard() {
             }
         });
 
-        renderCards(totalIncome, totalExpense);
+        renderCards(
+            totalIncome,
+            totalExpense
+        );
+
+        renderRecentTransactions(
+            transactions
+        );
+
+        // dùng categories thay vì transaction
+        renderCategoryReport(
+            categories
+        );
 
     } catch (err) {
-        console.error("Lỗi load dashboard:", err);
+
+        console.error(
+            "Lỗi load dashboard:",
+            err
+        );
     }
 }
+
 function fmt(n) {
     return Number(n).toLocaleString("vi-VN") + " ₫";
 }
+
+function renderRecentTransactions(transactions) {
+
+    const box =
+        document.getElementById(
+            "recentTransactions"
+        );
+
+    if (!box) return;
+
+    if (!transactions.length) {
+
+        box.innerHTML = `
+            <div class="empty-box">
+                Chưa có giao dịch
+            </div>
+        `;
+
+        return;
+    }
+
+    const latest = [...transactions]
+        .sort(
+            (a, b) =>
+                new Date(b.transaction_date) -
+                new Date(a.transaction_date)
+        )
+        .slice(0, 5);
+
+    box.innerHTML = latest
+        .map(t => {
+
+            const isIncome =
+                t.type === "income";
+
+            // income dùng wallet
+            const bg =
+                isIncome
+                    ? (
+                        t.wallet_bg ||
+                        "#ecfeff"
+                    )
+                    : (
+                        t.category_bg ||
+                        "#f3f4f6"
+                    );
+
+            const fg =
+                isIncome
+                    ? (
+                        t.wallet_fg ||
+                        "#0891b2"
+                    )
+                    : (
+                        t.category_fg ||
+                        "#374151"
+                    );
+
+            const icon =
+                isIncome
+                    ? (
+                        t.wallet_icon ||
+                        "ti ti-wallet"
+                    )
+                    : (
+                        t.category_icon ||
+                        "ti ti-category"
+                    );
+
+            return `
+                <div class="transaction-item">
+
+                    <div class="transaction-left">
+
+                        <div
+                            class="transaction-icon"
+                            style="
+                                background:
+                                ${bg};
+
+                                color:
+                                ${fg};
+                            "
+                        >
+
+                            <i class="ti ${icon}"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="transaction-title">
+                                ${t.title}
+                            </div>
+
+                            <div class="transaction-date">
+
+                                ${new Date(
+                                    t.transaction_date
+                                ).toLocaleDateString(
+                                    "vi-VN"
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="
+                        transaction-amount
+                        ${t.type}
+                    ">
+
+                        ${isIncome ? "+" : "-"}
+
+                        ${fmt(t.amount)}
+
+                    </div>
+
+                </div>
+            `;
+        })
+        .join("");
+}
+
+function renderCategoryReport(categories) {
+
+    const box =
+        document.getElementById(
+            "reportChart"
+        );
+
+    if (!box) return;
+
+    if (!categories.length) {
+
+        box.innerHTML = `
+            <div class="empty-box">
+                Chưa có dữ liệu
+            </div>
+        `;
+
+        return;
+    }
+
+    // tổng chi
+    const total = categories.reduce(
+        (sum, c) =>
+            sum + Number(c.spent || 0),
+        0
+    );
+
+    box.innerHTML = `
+        <div class="category-list">
+
+            ${categories.map(c => {
+
+                const spent =
+                    Number(c.spent || 0);
+
+                let percent = 0;
+
+                if (total > 0) {
+                    percent = Math.round(
+                        spent / total * 100
+                    );
+                }
+
+                return `
+                    <div class="category-item">
+
+                        <div class="category-left">
+
+                            <span
+                                class="category-dot"
+                                style="
+                                    background:
+                                    ${c.fg_color};
+                                "
+                            ></span>
+
+                            <span class="category-name">
+                                ${c.name}
+                            </span>
+
+                        </div>
+
+                        <div class="category-bar">
+
+                            <div
+                                class="category-fill"
+                                style="
+                                    width:
+                                    ${percent}%;
+
+                                    background:
+                                    ${c.fg_color};
+                                "
+                            ></div>
+
+                        </div>
+
+                        <div class="category-percent">
+                            ${percent}%
+                        </div>
+
+                    </div>
+                `;
+            }).join("")}
+
+        </div>
+    `;
+}
+
 function renderWallet(wallets) {
     const total = wallets.reduce((sum, w) => sum + Number(w.amount || 0), 0);
 
