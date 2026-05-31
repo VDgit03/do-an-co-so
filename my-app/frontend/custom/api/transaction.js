@@ -3,7 +3,7 @@ const USER_ID = localStorage.getItem("userId");
 
 // state
 const state = {
-selectedIds: [],
+  selectedIds: [],
   transactions: [],
   wallets: [],
   categories: [],
@@ -61,10 +61,10 @@ async function loadTransactions() {
     );
     const data = await res.json();
     state.transactions = (data.transactions || []).sort(
-        (a, b) =>
-          new Date(b.transaction_date) -
-          new Date(a.transaction_date)
-      );
+      (a, b) =>
+        new Date(b.transaction_date) -
+        new Date(a.transaction_date)
+    );
   } catch (err) {
     console.error(err);
   }
@@ -193,36 +193,59 @@ function renderTable() {
     `;
   } else {
     list.innerHTML = slice.map(t => {
-        const icon = t.type === "income"
-          ? (t.wallet_icon || "ti-wallet")
-          : (t.category_icon || "ti-tag");
+      const icon = t.category_icon || 'ti-tag';
+      const bg = t.category_bg || '#eee';
+      const col = t.category_fg || '#333';
+      let amtCls = '';
+      let amtStr = '';
 
-        const bg = t.type === "income"
-            ? (t.wallet_bg || "#e8f5e9")
-            : (t.category_bg || "#eee");
+      switch (t.type) {
 
-        const col = t.type === "income"
-            ? (t.wallet_fg || "#2e7d32")
-            : (t.category_fg || "#333"); 
-        const amtCls = t.type === 'income'
-            ? 'amount-income'
-            : 'amount-expense';
-        const amtStr = (t.type === 'income'
-            ? '+'
-            : '-') +
-          formatAmount(t.amount);
-        const typeBdg = t.type === 'income'
-            ? `
-              <span class="type-badge type-income">
-                Thu nhập
-              </span>
-            `
-            : `
-              <span class="type-badge type-expense">
-                Chi tiêu
-              </span>
-            `;
-        return `
+        case 'income':
+          amtCls = 'amount-income';
+          amtStr = '+' + formatAmount(t.amount);
+          break;
+
+        case 'expense':
+          amtCls = 'amount-expense';
+          amtStr = '-' + formatAmount(t.amount);
+          break;
+
+        case 'saving':
+          amtCls = 'amount-saving';
+          amtStr = formatAmount(t.amount);
+          break;
+
+      }
+      let typeBdg = '';
+
+      switch (t.type) {
+
+        case 'income':
+          typeBdg = `
+            <span class="type-badge type-income">
+              Thu nhập
+            </span>
+          `;
+          break;
+
+        case 'expense':
+          typeBdg = `
+            <span class="type-badge type-expense">
+              Chi tiêu
+            </span>
+          `;
+          break;
+
+        case 'saving':
+          typeBdg = `
+            <span class="type-badge type-saving">
+              Tiết kiệm
+            </span>
+          `;
+          break;
+      }
+      return `
           <div
             class="txn-row"
             data-id="${t.id}"
@@ -264,18 +287,19 @@ function renderTable() {
                   color:${col}
                 "
               >
-                ${
-                  t.type === 'income'
-                    ? t.wallet_name
-                    : t.category_name
-                }
+                ${t.type === 'income'
+          ? t.wallet_name
+          : t.type === 'saving'
+            ? 'Tiết kiệm'
+            : t.category_name
+        }
               </span>
             </div>
             <!-- DATE -->
             <div class="txn-date">
               ${new Date(
-                t.transaction_date
-              ).toLocaleDateString('vi-VN')}
+          t.transaction_date
+        ).toLocaleDateString('vi-VN')}
             </div>
             <!-- AMOUNT -->
             <div class="
@@ -300,12 +324,12 @@ function renderTable() {
             </div>
           </div>
         `;
-      }).join('');
+    }).join('');
   }
   document.getElementById(
     'pagInfo'
   ).textContent = total
-    ? `
+      ? `
       ${start + 1}–
       ${Math.min(
         start + state.pageSize,
@@ -313,7 +337,7 @@ function renderTable() {
       )}
       / ${total} giao dịch
     `.replace(/\s+/g, ' ')
-    : '0 giao dịch';
+      : '0 giao dịch';
   renderPagination(pages);
   initCheckboxes();
 }
@@ -347,8 +371,8 @@ function initCheckboxes() {
           }
         } else {
           state.selectedIds = state.selectedIds.filter(
-              x => x !== id
-            );
+            x => x !== id
+          );
         }
         row.classList.toggle(
           'selected',
@@ -366,8 +390,8 @@ function initCheckboxes() {
     checkAll.onchange = function () {
       if (this.checked) {
         state.selectedIds = [...checks].map(
-            c => Number(c.dataset.id)
-          );
+          c => Number(c.dataset.id)
+        );
       } else {
         state.selectedIds = [];
       }
@@ -394,12 +418,12 @@ function syncCheckAll() {
 
 function updateBulkBar() {
   const bar = document.getElementById(
-      'bulkBar'
-    );
+    'bulkBar'
+  );
 
   const count = document.getElementById(
-      'selectedCount'
-    );
+    'selectedCount'
+  );
   if (!bar || !count) return;
   if (state.selectedIds.length) {
     bar.classList.remove(
@@ -507,8 +531,8 @@ function renderPagination(pages) {
       class="
         pag-btn
         ${state.page === 1
-          ? 'disabled'
-          : ''}
+      ? 'disabled'
+      : ''}
       "
       id="pagPrev"
     >
@@ -522,8 +546,8 @@ function renderPagination(pages) {
         class="
           pag-btn
           ${i === state.page
-            ? 'active'
-            : ''}
+        ? 'active'
+        : ''}
         "
         data-page="${i}"
       >
@@ -537,8 +561,8 @@ function renderPagination(pages) {
       class="
         pag-btn
         ${state.page === pages
-          ? 'disabled'
-          : ''}
+      ? 'disabled'
+      : ''}
       "
       id="pagNext"
     >
@@ -593,8 +617,8 @@ function updateFilterBadge() {
     .filter(k => state.filters[k])
     .length;
   const badge = document.getElementById(
-      'filterBadge'
-    );
+    'filterBadge'
+  );
 
   badge.classList.toggle(
     'show',
@@ -614,16 +638,16 @@ function updateFilterTags() {
 
 function initFilter() {
   const btn = document.getElementById(
-      'filterBtn'
-    );
+    'filterBtn'
+  );
 
   const drop = document.getElementById(
-      'filterDrop'
-    );
+    'filterDrop'
+  );
 
   const fdMonth = document.getElementById(
-      'fdMonth'
-    );
+    'fdMonth'
+  );
 
   // dynamic month
   const now = new Date();
@@ -776,16 +800,16 @@ function initPageSize() {
 // validate
 function validateForm() {
   const amount = document.getElementById(
-      'fAmount'
-    ).value;
+    'fAmount'
+  ).value;
 
   const title = document.getElementById(
-      'fTitle'
-    ).value;
+    'fTitle'
+  ).value;
 
   const select = document.getElementById(
-      'fSelect'
-    ).value;
+    'fSelect'
+  ).value;
 
   if (!amount || Number(amount) <= 0) {
     alert(
@@ -925,8 +949,8 @@ function showToast(
   type = "success"
 ) {
   const area = document.querySelector(
-      ".toast-area"
-    );
+    ".toast-area"
+  );
   if (!area) return;
   const toast = document.createElement("div");
   toast.className = `toast t-${type}`;
@@ -1007,11 +1031,11 @@ function initModal() {
 function buildForm(type) {
   const amtLabel = {
     income: 'Số tiền nhận',
-    expense:'Số tiền chi'
+    expense: 'Số tiền chi'
   }[type];
   const selectField =
     type === 'income'
-    ? `
+      ? `
       <div>
         <label class="form-label">
           Ví nhận
@@ -1022,13 +1046,13 @@ function buildForm(type) {
           id="fSelect"
         >
           ${buildOptions(
-            state.wallets,
-            'Chọn ví...'
-          )}
+        state.wallets,
+        'Chọn ví...'
+      )}
         </select>
       </div>
     `
-    : `
+      : `
       <div>
         <label class="form-label">
           Danh mục
@@ -1039,9 +1063,9 @@ function buildForm(type) {
           id="fSelect"
         >
           ${buildOptions(
-            state.categories,
-            'Chọn danh mục...'
-          )}
+        state.categories,
+        'Chọn danh mục...'
+      )}
         </select>
       </div>
     `;
@@ -1166,11 +1190,11 @@ async function saveTransaction() {
     }
     closeModal();
     showToast(
-  activeType === "income"
-    ? "Đã thêm thu nhập"
-    : "Đã thêm chi tiêu",
-  "success"
-);
+      activeType === "income"
+        ? "Đã thêm thu nhập"
+        : "Đã thêm chi tiêu",
+      "success"
+    );
     await loadTransactions();
     await loadCategories(
       txMonth,
@@ -1207,8 +1231,8 @@ init();
 
 // xóa hết
 document.getElementById('deleteSelected').addEventListener(
-    'click',
-    deleteSelected
+  'click',
+  deleteSelected
 );
 
 // xóa chọn
@@ -1226,8 +1250,8 @@ document.getElementById('clearSelected').addEventListener(
           );
       });
     const checkAll = document.getElementById(
-        'checkAll'
-      );
+      'checkAll'
+    );
     if (checkAll) {
       checkAll.checked = false;
     }

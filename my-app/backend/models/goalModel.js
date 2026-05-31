@@ -100,7 +100,7 @@ export async function updateGoal(id, userId, data) {
 }
 
 // Xóa
-export async function deleteGoal(id, userId) {
+export async function removeGoal(id, userId) {
     await db.query(
         `DELETE FROM goals
          WHERE id = ? AND user_id = ?`,
@@ -109,12 +109,57 @@ export async function deleteGoal(id, userId) {
 }
 
 // Nạp tiền
-export async function depositGoal(id, userId, amount) {
+export async function depositGoal(
+    goalId,
+    userId,
+    amount
+) {
 
-    await db.query(
-        `UPDATE goals
+    const conn = await db.getConnection();
+
+    try {
+
+        await conn.beginTransaction();
+
+        // cộng tiền mục tiêu
+        await conn.query(
+            `UPDATE goals
          SET saved_amount = saved_amount + ?
          WHERE id = ? AND user_id = ?`,
-        [amount, id, userId]
-    );
+            [amount, goalId, userId]
+        );
+
+        await conn.query(
+            `INSERT INTO transaction
+    (
+        user_id,
+        goal_id,
+        type,
+        amount,
+        title,
+        transaction_date
+    )
+    VALUES (?, ?, 'saving', ?, ?, NOW())`,
+            [
+                userId,
+                goalId,
+                amount,
+                'Nạp tiền mục tiêu tiết kiệm'
+            ]
+        );
+
+        await conn.commit();
+
+    }
+    catch (err) {
+
+        await conn.rollback();
+        throw err;
+
+    }
+    finally {
+
+        conn.release();
+
+    }
 }

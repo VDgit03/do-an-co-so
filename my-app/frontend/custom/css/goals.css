@@ -444,7 +444,7 @@ main {
     margin-bottom: 1rem;
 }
 
-.field>label {
+.field label {
     display: block;
     font-size: 13px;
     color: #111;
@@ -452,22 +452,23 @@ main {
     font-weight: 500;
 }
 
+.field input[type="date"],
 .field input[type="text"],
 .field input[type="number"] {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #d4d4d0;
-    border-radius: 10px;
-    font-size: 14px;
-    background: #fff;
     color: #111;
-    font-family: inherit;
-    transition: border-color 0.12s;
+    width: 100%;
+    padding: 9px 12px;
+    border: 0.5px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: #fff;
+    transition: border-color 0.15s;
 }
 
 .field input:focus {
     outline: none;
-    border-color: #1D9E75;
+    border-color: #1A56DB;
 }
 
 .field-hint {

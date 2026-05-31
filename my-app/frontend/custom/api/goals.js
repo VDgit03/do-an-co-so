@@ -6,9 +6,7 @@ let selectedCI = 0;    // Màu đang chọn trong form
 
 let goals = [];
 let nextId = 1;
-// ============================================================
-//  HELPERS
-// ============================================================
+const goalId = new URLSearchParams(location.search).get("id");
 
 /** Phần trăm hoàn thành (0–100) */
 function calcPct(goal) {
@@ -58,10 +56,6 @@ function calcMonthlyNeeded(goal) {
   if (m === 0) return rem; // quá hạn → cần toàn bộ ngay
   return rem / m;
 }
-
-// ============================================================
-//  WATER DROP SVG
-// ============================================================
 
 /**
  * Tạo SVG giọt nước với mức nước theo tỷ lệ hoàn thành.
@@ -114,9 +108,6 @@ function buildDrop(goal, W, H) {
     </svg>`;
 }
 
-// ============================================================
-//  RENDER CARDS
-// ============================================================
 
 function renderAll() {
   const grid = document.getElementById('grid');
@@ -231,10 +222,6 @@ function renderAddCard() {
     </div>`;
 }
 
-// ============================================================
-//  MODAL HELPERS
-// ============================================================
-
 function openModal(html) {
   document.getElementById('modal-body').innerHTML = html;
   document.getElementById('overlay').classList.add('on');
@@ -250,9 +237,6 @@ document.getElementById('overlay').addEventListener('click', (e) => {
   if (e.target === document.getElementById('overlay')) closeModal();
 });
 
-// ============================================================
-//  FORM: THÊM / CHỈNH SỬA MỤC TIÊU
-// ============================================================
 
 function toInputDate(str) {
   if (!str) return '';
@@ -360,7 +344,7 @@ function updatePreview() {
   const name = document.getElementById('f-name').value || 'Tên mục tiêu';
   const t = parseInt(document.getElementById('f-target').value) || 0;
   const s = Math.min(parseInt(document.getElementById('f-saved').value) || 0, t || 1);
-  const dd = document.getElementById('f-deadline').value;
+  const dd = document.getElementById('f-deadline').value || null;
   const p = t > 0 ? Math.round(s / t * 100) : 0;
   const c = COLORS[selectedCI];
 
@@ -416,7 +400,7 @@ async function saveGoal(id) {
     document.getElementById('f-created').value;
 
   const deadline =
-    document.getElementById('f-deadline').value;
+    document.getElementById('f-deadline').value || null;
 
   if (!name || !target_amount) return;
 
@@ -460,11 +444,7 @@ async function saveGoal(id) {
     console.log(err);
   }
 }
-
-
-// ============================================================
 //  FORM: NẠP TIỀN
-// ============================================================
 
 function buildDepositForm(id) {
   const g = goals.find(x => x.id === id);
@@ -522,18 +502,49 @@ function buildDepositForm(id) {
     </div>`;
 }
 
-function confirmDeposit() {
-  const g = goals.find(x => x.id === activeDepId);
-  const amt = parseInt(document.getElementById('dep-amount').value) || 0;
-  if (amt <= 0) { alert('Vui lòng nhập số tiền hợp lệ.'); return; }
-  g.saved = Math.min(g.saved + amt, g.target);
-  closeModal();
-  renderAll();
-}
+async function confirmDeposit() {
 
-// ============================================================
+  const amt =
+    parseInt(document.getElementById('dep-amount').value) || 0;
+
+  if (amt <= 0) {
+    alert('Vui lòng nhập số tiền hợp lệ.');
+    return;
+  }
+
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:3000/api/goals/${activeDepId}/deposit`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: amt
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    console.log(data);
+
+    closeModal();
+
+    loadGoals();
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+}
 //  OPEN HANDLERS
-// ============================================================
 
 function openNew() {
   selectedCI = 0;
@@ -551,10 +562,48 @@ function openDeposit(id) {
   openModal(buildDepositForm(id));
 }
 
-function deleteGoal(id) {
-  if (!confirm('Xóa mục tiêu này?')) return;
-  goals = goals.filter(x => x.id !== id);
-  renderAll();
+async function deleteGoal(id) {
+
+  if (!confirm("Xóa mục tiêu này?"))
+    return;
+
+  try {
+
+    const token =
+      localStorage.getItem("token");
+
+    const res = await fetch(
+      `http://localhost:3000/api/goals/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.message
+      );
+    }
+
+    goals = goals.filter(
+      g => g.id !== id
+    );
+
+    renderAll();
+
+    alert("Đã xóa mục tiêu");
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert(err.message);
+  }
 }
 
 
@@ -570,12 +619,7 @@ const COLORS = [
   { fill: '#636e72', light: '#eaeaea' },
 ];
 
-// ============================================================
 //  INIT
-// ============================================================
-
-
-
 
 async function loadGoals() {
 

@@ -5,7 +5,7 @@ import {
     getGoals,
     addGoal,
     editGoal,
-    removeGoal,
+    deleteGoal,
     deposit
 } from "../controllers/goalsController.js";
 import { verifyToken } from "../middlewares/authMiddlewares.js";
@@ -17,7 +17,7 @@ router.post("/", verifyToken, addGoal);
 
 router.put("/:id", verifyToken, editGoal);
 
-router.delete("/:id", verifyToken, removeGoal);
+router.delete("/:id", verifyToken, deleteGoal);
 
 router.patch("/:id/deposit", verifyToken, deposit);
 

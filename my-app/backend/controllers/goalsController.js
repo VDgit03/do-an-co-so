@@ -3,11 +3,10 @@ import {
     getGoalsByUser,
     createGoal,
     updateGoal,
-    deleteGoal,
+    removeGoal,
     depositGoal
 } from "../models/goalModel.js";
 
-// GET
 export async function getGoals(req, res) {
 
     try {
@@ -110,28 +109,45 @@ export async function editGoal(req, res) {
 }
 
 // DELETE
-export async function removeGoal(req, res) {
+export async function deleteGoal(req, res) {
 
     try {
 
         const userId = req.user.id;
+        const goalId = req.params.id;
 
-        await deleteGoal(
-            req.params.id,
-            userId
+        const [result] = await db.query(
+            `
+            DELETE FROM goals
+            WHERE id = ?
+            AND user_id = ?
+            `,
+            [goalId, userId]
         );
 
+        if (result.affectedRows === 0) {
+
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy mục tiêu"
+            });
+
+        }
+
         res.json({
-            message: "Xóa thành công"
+            success: true,
+            message: "Xóa mục tiêu thành công"
         });
 
     } catch (err) {
 
-        console.log(err);
+        console.error(err);
 
         res.status(500).json({
-            message: "Lỗi server"
+            success: false,
+            message: err.message
         });
+
     }
 }
 

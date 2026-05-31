@@ -127,3 +127,16 @@ ADD bg_color VARCHAR(20),
 ADD fg_color VARCHAR(20);
 ALTER TABLE budgets
 ADD UNIQUE KEY uniq_budget (user_id, category_id, month, year);
+
+ALTER TABLE transaction
+MODIFY type ENUM(
+    'income',
+    'expense',
+    'saving'
+) NOT NULL;
+
+ALTER TABLE transaction
+ADD goal_id INT NULL,
+ADD FOREIGN KEY (goal_id)
+REFERENCES goals(id)
+ON DELETE SET NULL;

@@ -1,11 +1,3 @@
-// button wallet
-function toggleWalletMenu() {
-    const menu = document.getElementById("walletMenu");
-    const arrow = document.querySelector(".arrow");
-    menu.classList.toggle("show");
-    arrow.classList.toggle("rotate");
-}
-
 // button user
 function toggleUserMenu() {
     document.getElementById("userMenu").classList.toggle("show");
@@ -42,9 +34,8 @@ setInterval(updateDateTime, 60000);
 
 const REPORTS = {}
 let DATA = {};
-let currentMonth = 5;
-let currentYear = 2026;
-
+let currentMonth = new Date().getMonth() + 1;
+let currentYear = new Date().getFullYear();
 /* month trans */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -115,7 +106,7 @@ let stackedChart = null;
 
 const fmt = v => {
 
-    return (v * 1000000).toLocaleString("vi-VN") + " ₫";
+    return (v * 1).toLocaleString("vi-VN") + " ₫";
 };
 
 function renderMonth() {
@@ -315,7 +306,7 @@ function renderBar() {
                 scales: {
                     y: {
                         ticks: {
-                            callback: v => v + "tr"
+                            callback: v => v + "đ"
                         }
                     }
                 }
@@ -330,12 +321,12 @@ function renderBar() {
 
 function renderLine() {
 
-    const { labels, income, expense } =
-        DATA.monthly;
-
-    const saving = income.map((v, i) =>
-        +(v - expense[i]).toFixed(1)
-    );
+    const {
+        labels,
+        income,
+        expense,
+        saving
+    } = DATA.monthly;
 
     if (lineChart) {
         lineChart.destroy();
@@ -399,15 +390,15 @@ function renderLine() {
 
 function renderStacked(months = 12) {
 
-    const labels =
-        DATA.monthly.labels.slice(-months);
+    if (!DATA || !DATA.categories || !DATA.categoryMonthly) return;
 
-    const datasets =
-        DATA.categories.labels.map((name, i) => ({
-            label: name,
-            data: DATA.categoryMonthly[i].slice(-months),
-            backgroundColor: DATA.categories.colors[i]
-        }));
+    const labels = DATA.monthly?.labels?.slice(-months) || [];
+
+    const datasets = DATA.categories.labels.map((name, i) => ({
+        label: name,
+        data: (DATA.categoryMonthly[i] || []).slice(-months),
+        backgroundColor: DATA.categories.colors[i]
+    }));
 
     if (stackedChart) {
         stackedChart.destroy();
@@ -442,7 +433,7 @@ function renderStacked(months = 12) {
                         stacked: true,
 
                         ticks: {
-                            callback: v => v + "tr"
+                            callback: v => v + "đ"
                         }
                     }
                 }
@@ -473,29 +464,6 @@ function rerenderAll() {
 
     renderStacked(12);
 }
-
-// /* =========================================================
-//    MONTH BUTTON EVENTS
-// ========================================================= */
-
-// prevBtn.addEventListener("click", () => {
-
-//     currentMonth--;
-
-//     if (currentMonth < 1) {
-
-//         currentMonth = 12;
-
-//         currentYear--;
-//     }
-
-//     renderMonth();
-
-//     loadReport(
-//         currentMonth,
-//         currentYear
-//     );
-// });
 
 /* =========================================================
    INIT

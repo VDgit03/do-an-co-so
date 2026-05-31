@@ -17,6 +17,7 @@ export async function buildMonthlyReport(
 
     let income = 0;
     let expense = 0;
+    let saving = 0;
 
     const categoryMap = {};
     const monthlyMap = {};
@@ -34,7 +35,8 @@ export async function buildMonthlyReport(
 
             monthlyMap[monthKey] = {
                 income: 0,
-                expense: 0
+                expense: 0,
+                saving: 0
             };
         }
 
@@ -58,6 +60,13 @@ export async function buildMonthlyReport(
                 (categoryMap[category] || 0)
                 + amount;
         }
+
+        if (t.type === "saving") {
+
+            saving += amount;
+
+            monthlyMap[monthKey].saving += amount;
+        }
     });
 
     return {
@@ -65,8 +74,8 @@ export async function buildMonthlyReport(
         summary: {
             income,
             expense,
-            saving: income - expense,
-            balance: income - expense
+            saving,
+            balance: income - expense - saving
         },
 
         categories: {
@@ -92,7 +101,10 @@ export async function buildMonthlyReport(
                 .map(v => v.income),
 
             expense: Object.values(monthlyMap)
-                .map(v => v.expense)
+                .map(v => v.expense),
+
+            saving: Object.values(monthlyMap)
+                .map(v => v.saving)
         },
 
         transaction

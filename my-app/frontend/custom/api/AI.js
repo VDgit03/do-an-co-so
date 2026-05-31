@@ -1,8 +1,3 @@
-/* ── CONFIG ── */
-const API_URL = 'https://api.anthropic.com/v1/messages';
-// Thay bằng API key của bạn (hoặc route qua backend Node.js để bảo mật)
-const API_KEY = 'YOUR_API_KEY_HERE';
-
 /* ── STATE (persisted) ── */
 let state = {
     messages: [],       // [{role,content,time,pending?}]
@@ -80,6 +75,10 @@ function showChips(chips) {
 function chipClick(text) {
     document.getElementById('chips').innerHTML = '';
     document.getElementById('chat-input').value = text;
+    if (text === "🎯 Mở mục Tiết kiệm") {
+        window.location.href = "/goals";
+        return;
+    }
     sendMessage();
 }
 
@@ -175,6 +174,7 @@ function hideTyping() {
 async function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
+    state.pendingGoal = null;
     if (!text) return;
 
     input.value = '';
@@ -196,11 +196,49 @@ async function sendMessage() {
 
     showTyping();
     setBtnLoading(true);
+    if (state.pendingGoal) {
+
+        const amount =
+            parseMoney(message);
+
+        if (!amount) {
+
+            addBotMessage(
+                "Vui lòng nhập số tiền mục tiêu."
+            );
+
+            return;
+        }
+
+        state.draft = {
+            action: "create_goal",
+            name: state.pendingGoal.name,
+            target_amount: amount
+        };
+
+        state.pendingGoal = null;
+
+        saveState();
+
+        renderGoalDraft(state.draft);
+
+        return;
+    }
 
     try {
-        const reply = await callClaude(systemPrompt, apiMessages);
+        const reply =
+            await callGemini(
+                systemPrompt,
+                apiMessages
+            );
+
         hideTyping();
-        parseAndRender(reply, text);
+
+        parseAndRender(
+            reply,
+            text
+        );
+
     } catch (e) {
         hideTyping();
         addBotMessage('❌ Lỗi kết nối API. Vui lòng kiểm tra API key và thử lại.');
@@ -210,112 +248,221 @@ async function sendMessage() {
 }
 
 /* ── CLAUDE API ── */
-async function callClaude(system, messages) {
-    const res = await fetch(AI_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': API_KEY,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
-            max_tokens: 1000,
-            system,
-            messages
-        })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    return data.content?.[0]?.text || '';
+async function callGemini(
+    system,
+    messages
+) {
+    const res =
+        await fetch(
+            "http://localhost:3000/api/ai/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    system,
+                    messages
+                })
+            }
+        );
+
+    const data =
+        await res.json();
+
+    if (!data.success) {
+        throw new Error(
+            data.message
+        );
+    }
+
+    return data.reply;
 }
 
 /* ── SYSTEM PROMPT ── */
 function buildSystemPrompt() {
-    return `Bạn là trợ lý tài chính cá nhân cho ứng dụng Money Track. Người dùng nói tiếng Việt tự nhiên.
- 
-Nhiệm vụ của bạn:
-1. Phát hiện giao dịch (thu nhập, chi tiêu, tiết kiệm) từ tin nhắn
-2. Tự động phân loại danh mục
-3. Hỏi thêm nếu thiếu thông tin quan trọng
-4. Trả về JSON cho giao dịch
- 
-Danh mục chi tiêu: Ăn uống, Di chuyển, Mua sắm, Giải trí, Y tế, Giáo dục, Hoá đơn, Khác
-Danh mục thu nhập: Lương, Thưởng, Đầu tư, Phụ cấp, Khác
-Danh mục tiết kiệm: Mua nhà, Mua xe, Du lịch, Khẩn cấp, Khác
- 
-Khi phát hiện giao dịch, trả lời theo định dạng:
-[TRANSACTION]
-{"type":"expense|income|saving","desc":"mô tả","amount":50000,"category":"Ăn uống"}
-[/TRANSACTION]
-Sau đó giải thích ngắn gọn.
- 
-Nếu người dùng hỏi số dư, trả lời dựa trên: Thu nhập: ${state.totals.income}, Chi tiêu: ${state.totals.expense}, Tiết kiệm: ${state.totals.saving}
-Số dư: ${state.totals.income - state.totals.expense}
- 
-Giữ phong cách thân thiện, ngắn gọn. Đừng hỏi quá nhiều câu hỏi một lúc.`;
+    return `
+Bạn là trợ lý tài chính Money Track.
+
+Hãy nhận diện ý định người dùng.
+
+Các action hợp lệ:
+
+1. create_transaction
+
+Ví dụ:
+
+[ACTION]
+{
+  "action":"create_transaction",
+  "type":"expense",
+  "title":"Ăn phở",
+  "amount":50000,
+  "category":"Ăn uống"
+}
+[/ACTION]
+Nếu người dùng muốn:
+
+- tạo mục tiêu
+- tiết kiệm
+- lập kế hoạch tiết kiệm
+- mua xe
+- mua nhà
+- mua laptop
+
+KHÔNG tạo action.
+
+Hãy trả lời:
+
+🎯 Bạn có thể tạo mục tiêu tiết kiệm tại mục "Tiết kiệm" của ứng dụng.
+
+Nếu chỉ hỏi thống kê hoặc trò chuyện thì trả lời bình thường.
+
+Không giải thích JSON.
+`;
 }
 
 /* ── PARSE AI RESPONSE ── */
 function parseAndRender(reply, userText) {
-    const txnMatch = reply.match(/\[TRANSACTION\]([\s\S]*?)\[\/TRANSACTION\]/);
+    const actionMatch =
+        reply.match(
+            /\[ACTION\]([\s\S]*?)\[\/ACTION\]/
+        );
 
-    if (txnMatch) {
+    if (!actionMatch) {
+        addBotMessage(reply);
+        return;
+    }
+
+    const action =
+        JSON.parse(
+            actionMatch[1].trim()
+        );
+
+    if (actionMatch) {
         try {
-            const txn = JSON.parse(txnMatch[1].trim());
-            const cleanReply = reply.replace(/\[TRANSACTION\][\s\S]*?\[\/TRANSACTION\]/, '').trim();
+            const action = JSON.parse(actionMatch[1].trim());
+            const cleanReply = reply.replace(/\[ACTION\][\s\S]*?\[\/ACTION\]/, '').trim();
 
             // Save draft
-            state.draft = { ...txn, confirmed: false };
+            state.draft = { ...action, confirmed: false };
             saveState();
             updatePendingDot(true);
             checkDraft();
 
-            addBotMessage(cleanReply || 'Tôi đã phân tích giao dịch của bạn:', txn);
+            addBotMessage(cleanReply || 'Tôi đã phân tích giao dịch của bạn:', action);
 
-            showChips(['Xác nhận', 'Sửa số tiền', 'Đổi danh mục', 'Huỷ bỏ']);
+
         } catch (e) {
             addBotMessage(reply);
         }
     } else {
         addBotMessage(reply);
-        // Contextual chips
+
         const lower = reply.toLowerCase();
-        if (lower.includes('tiết kiệm')) showChips(['Tạo tiết kiệm mua nhà', 'Tiết kiệm du lịch']);
-        else if (lower.includes('danh mục')) showChips(['Ăn uống', 'Di chuyển', 'Mua sắm']);
-        else showChips(['Thêm giao dịch khác', 'Xem số dư', 'Báo cáo tháng']);
+
+        if (
+            lower.includes("tiết kiệm") ||
+            lower.includes("mục tiêu")
+        ) {
+            showChips([
+                "Mở mục Tiết kiệm",
+                "Xem mục tiêu hiện có"
+            ]);
+
+        } else if (lower.includes("danh mục")) {
+            showChips([
+                "Ăn uống",
+                "Di chuyển",
+                "Mua sắm"
+            ]);
+
+        } else {
+            showChips([
+                "Thêm giao dịch khác",
+                "Xem báo cáo tháng",
+                "Xem chi tiêu gần đây"
+            ]);
+        }
     }
 }
 
 /* ── CONFIRM / EDIT TXN ── */
-function confirmTxn() {
+async function confirmTxn() {
     if (!state.draft) return;
+
     const t = state.draft;
 
-    // Add to transactions
-    state.transactions.unshift({ ...t, id: Date.now(), time: nowTime(), confirmed: true });
+    const token = localStorage.getItem("token");
+    const user_id = localStorage.getItem("user_id");
 
-    // Update totals
-    if (t.type === 'income') state.totals.income += t.amount;
-    else if (t.type === 'expense') state.totals.expense += t.amount;
-    else if (t.type === 'saving') state.totals.saving += t.amount;
+    console.log("TOKEN:", token);
+    console.log("USER_ID:", user_id);
+    console.log("DRAFT:", t);
 
-    state.draft = null;
-    saveState();
+    if (!token && !user_id) {
+        addBotMessage("❌ Bạn chưa đăng nhập");
+        return;
+    }
 
-    // Mark last pending message as confirmed
-    const lastPending = [...state.messages].reverse().find(m => m.pendingTxn && !m.pendingTxn.confirmed);
-    if (lastPending) { lastPending.pendingTxn.confirmed = true; saveState(); }
+    try {
 
-    renderAllMessages();
-    renderSummary();
-    renderTransactions();
-    updatePendingDot(false);
-    checkDraft();
+        const res = await fetch(
+            "http://localhost:3000/api/ai/execute",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`
+                    })
+                },
+                body: JSON.stringify({
+                    user_id: user_id ? Number(user_id) : null,
+                    action: t
+                })
+            }
+        );
 
-    addBotMessage(`✅ Đã ghi *${t.desc}* – *${formatMoney(t.amount)}* vào danh mục *${t.category}*.\n\nBạn có muốn thêm giao dịch nào khác không?`);
-    showChips(['Thêm giao dịch', 'Xem số dư', 'Tạo tiết kiệm']);
+        const data = await res.json();
+
+        console.log("EXECUTE RESULT:", data);
+
+        if (!data.success) {
+            throw new Error(data.message);
+        }
+
+        state.transactions.unshift({
+            ...t,
+            id: data.id || Date.now()
+        });
+
+        state.draft = null;
+
+        saveState();
+
+        updatePendingDot(false);
+
+        checkDraft();
+
+        addBotMessage("✅ Đã lưu thành công");
+
+    } catch (err) {
+
+        console.error(err);
+
+        addBotMessage(
+            `❌ ${err.message || "Lỗi lưu giao dịch"}`
+        );
+    }
+    if (t.action === "create_goal") {
+
+        window.location.href =
+            `/goals?id=${data.id}`;
+
+        return;
+    }
 }
 
 function editTxn() {
@@ -376,3 +523,4 @@ function handleKey(e) {
 
 // Init pending dot
 updatePendingDot(!!state.draft && !state.draft?.confirmed);
+
