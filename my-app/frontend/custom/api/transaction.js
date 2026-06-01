@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const TRANSACTION_API_URL = "http://localhost:3000/api";
 const USER_ID = localStorage.getItem("userId");
 
 // state
@@ -57,7 +57,7 @@ function initTable() {
 async function loadTransactions() {
   try {
     const res = await fetch(
-      `${API_URL}/transaction/${USER_ID}`
+      `${TRANSACTION_API_URL}/transaction/${USER_ID}`
     );
     const data = await res.json();
     state.transactions = (data.transactions || []).sort(
@@ -74,7 +74,7 @@ async function loadTransactions() {
 async function loadWallets() {
   try {
     const res = await fetch(
-      `${API_URL}/wallet/user/${USER_ID}`
+      `${TRANSACTION_API_URL}/wallet/user/${USER_ID}`
     );
     const data = await res.json();
     state.wallets = data.wallets || [];
@@ -90,7 +90,7 @@ async function loadCategories(
 ) {
   try {
     const res = await fetch(
-      `${API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
+      `${TRANSACTION_API_URL}/cate/${USER_ID}?month=${month}&year=${year}`
     );
     const data = await res.json();
     state.categories = data.categories || [];
@@ -193,14 +193,22 @@ function renderTable() {
     `;
   } else {
     list.innerHTML = slice.map(t => {
-      const icon = t.category_icon || 'ti-tag';
-      const bg = t.category_bg || '#eee';
-      const col = t.category_fg || '#333';
+      let icon = 'ti-tag';
+      let bg = '#eee';
+      let col = '#333';
+
+      if (t.type === 'income') {
+        icon = t.wallet_icon || 'ti-wallet';
+        bg = t.wallet_bg || '#e8f5e9';
+        col = t.wallet_fg || '#2e7d32';
+      } else {
+        icon = t.category_icon || 'ti-tag';
+        bg = t.category_bg || '#eee';
+        col = t.category_fg || '#333';
+      }
       let amtCls = '';
       let amtStr = '';
-
       switch (t.type) {
-
         case 'income':
           amtCls = 'amount-income';
           amtStr = '+' + formatAmount(t.amount);
@@ -446,7 +454,7 @@ async function deleteTransaction(id) {
   if (!ok) return;
   try {
     const res = await fetch(
-      `${API_URL}/transaction/${id}`,
+      `${TRANSACTION_API_URL}/transaction/${id}`,
       {
         method: 'DELETE'
       }
@@ -491,7 +499,7 @@ async function deleteSelected() {
     const results = await Promise.all(
       state.selectedIds.map(id =>
         fetch(
-          `${API_URL}/transaction/${id}`,
+          `${TRANSACTION_API_URL}/transaction/${id}`,
           {
             method: 'DELETE'
           }
@@ -1170,7 +1178,7 @@ async function saveTransaction() {
   }
   try {
     const res = await fetch(
-      `${API_URL}/transaction`,
+      `${TRANSACTION_API_URL}/transaction`,
       {
         method: 'POST',
         headers: {

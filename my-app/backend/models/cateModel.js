@@ -1,7 +1,11 @@
 import pool from "../config/db.js";
 
 // lấy
-export const getAllCategoriesModel = async (userId) => {
+  export const getAllCategoriesModel = async (
+    userId,
+    month,
+    year
+) => {
 
     const [rows] = await pool.query(
         `
@@ -18,14 +22,18 @@ export const getAllCategoriesModel = async (userId) => {
 
         FROM categories c
 
-        LEFT JOIN budgets b
+        INNER JOIN budgets b
             ON c.id = b.category_id
             AND b.user_id = ?
+            AND b.month = ?
+            AND b.year = ?
 
         LEFT JOIN transaction t
             ON t.category_id = c.id
             AND t.user_id = ?
             AND t.type = 'expense'
+            AND MONTH(t.transaction_date) = ?
+            AND YEAR(t.transaction_date) = ?
 
         WHERE c.user_id = ?
 
@@ -41,14 +49,19 @@ export const getAllCategoriesModel = async (userId) => {
         `,
         [
             userId,
+            month,
+            year,
+
             userId,
+            month,
+            year,
+
             userId
         ]
     );
 
     return rows;
 };
-
 // tạo
 export const addCategoryModel = async (data) => {
     const {

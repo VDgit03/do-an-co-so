@@ -37,8 +37,11 @@ async function loadDashboard() {
         const categories =
             cateData.categories || [];
 
+        
+
         let totalIncome = 0;
         let totalExpense = 0;
+        let totalSaving = 0;
 
         transactions.forEach(t => {
 
@@ -53,16 +56,24 @@ async function loadDashboard() {
             ) {
 
                 if (t.type === "income") {
+
                     totalIncome += amount;
-                } else {
+
+                } else if (t.type === "expense") {
+
                     totalExpense += amount;
+
+                } else if (t.type === "saving") {
+
+                    totalSaving += amount;
                 }
             }
         });
 
         renderCards(
             totalIncome,
-            totalExpense
+            totalExpense,
+            totalSaving
         );
 
         renderRecentTransactions(
@@ -232,13 +243,6 @@ function renderCategoryReport(categories) {
         return;
     }
 
-    // tổng chi
-    const total = categories.reduce(
-        (sum, c) =>
-            sum + Number(c.spent || 0),
-        0
-    );
-
     box.innerHTML = `
         <div class="category-list">
 
@@ -247,11 +251,14 @@ function renderCategoryReport(categories) {
                 const spent =
                     Number(c.spent || 0);
 
+                const budget =
+                    Number(c.budget || 0);
+
                 let percent = 0;
 
-                if (total > 0) {
+                if (budget > 0) {
                     percent = Math.round(
-                        spent / total * 100
+                        spent / budget * 100
                     );
                 }
 
@@ -280,7 +287,7 @@ function renderCategoryReport(categories) {
                                 class="category-fill"
                                 style="
                                     width:
-                                    ${percent}%;
+                                    ${Math.min(percent, 100)}%;
 
                                     background:
                                     ${c.fg_color};
@@ -309,8 +316,11 @@ function renderWallet(wallets) {
         <div class="value">${fmt(total)}</div>
     `;
 }
-function renderCards(income, expense) {
-    const saving = income - expense;
+function renderCards(
+    income,
+    expense,
+    saving
+) {
 
     document.querySelector(".card-income").innerHTML = `
         <h4>Thu nhập</h4>

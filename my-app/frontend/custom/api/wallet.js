@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/wallet";
+const WALLET_API_URL = "http://localhost:3000/api/wallet";
 
 // format
 function fmt(n) {
@@ -56,7 +56,7 @@ const CATEGORIES = {
     investment: {
         label: "Đầu tư",
         icon: "ti-trending-up",
-        badge: "b-investment",
+        badge: "b-invest",
         icon_cls: "i-invest",
         bg: "#fff3e0",
         fg: "#ef6c00"
@@ -89,7 +89,7 @@ async function loadWallets() {
             localStorage.getItem("userId");
 
         const res = await fetch(
-            `${API_URL}/user/${userId}`
+            `${WALLET_API_URL}/user/${userId}`
         );
 
         const data = await res.json();
@@ -343,7 +343,7 @@ async function saveWallet() {
     }
     try {
         const res = await fetch(
-            API_URL,
+            WALLET_API_URL,
             {
                 method: "POST",
                 headers: {
@@ -470,7 +470,7 @@ async function updateWallet(id) {
     const note = document.getElementById("f-note").value.trim();
     try {
         const res = await fetch(
-            `${API_URL}/${id}`,
+            `${WALLET_API_URL}/${id}`,
             {
                 method: "PUT",
                 headers: {
@@ -506,7 +506,7 @@ async function deleteWallet(id) {
     if (!confirmDelete) return;
     try {
         const res = await fetch(
-            `${API_URL}/${id}`,
+            `${WALLET_API_URL}/${id}`,
             {
                 method: "DELETE"
             }
