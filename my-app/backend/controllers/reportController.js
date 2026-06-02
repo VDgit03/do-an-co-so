@@ -6,13 +6,11 @@ export async function getMonthlyReport(
     req,
     res
 ) {
-
     try {
 
         const { month, year } = req.query;
 
-        // demo user
-        const userId = 1;
+        const userId = req.user.id;
 
         const report =
             await buildMonthlyReport(

@@ -1,6 +1,4 @@
-import {
-    getTransactionsByMonth
-} from "../models/transactionModel.js";
+import { getTransactionsByMonth } from "../models/reportModel.js";
 
 export async function buildMonthlyReport(
     userId,

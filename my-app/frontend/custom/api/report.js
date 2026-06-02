@@ -150,8 +150,15 @@ async function loadReport(month, year) {
 
     try {
 
+        const token = localStorage.getItem("token");
+
         const res = await fetch(
-            `http://localhost:3000/api/reports?month=${month}&year=${year}`
+            `http://localhost:3000/api/reports?month=${month}&year=${year}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
         );
 
         DATA = await res.json();
@@ -182,20 +189,14 @@ function renderSummary() {
     const incBadge =
         document.getElementById("badge-income");
 
-    incBadge.textContent =
-        `${s.incomeChange > 0 ? "+" : ""}${s.incomeChange}% so với tháng trước`;
-
-    incBadge.className =
-        "metric-badge " + (s.incomeChange >= 0 ? "up" : "down");
+    incBadge.textContent = "Không có dữ liệu so sánh";
+    incBadge.className = "metric-badge";
 
     const expBadge =
         document.getElementById("badge-expense");
 
-    expBadge.textContent =
-        `${s.expenseChange > 0 ? "+" : ""}${s.expenseChange}% so với tháng trước`;
-
-    expBadge.className =
-        "metric-badge " + (s.expenseChange <= 0 ? "up" : "down");
+    expBadge.textContent = "Không có dữ liệu so sánh";
+    expBadge.className = "metric-badge";
 
 }
 
