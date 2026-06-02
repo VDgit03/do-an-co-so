@@ -294,11 +294,23 @@ function buildGoalForm(g) {
       </div>
       <div class="field">
         <label>Đã tiết kiệm được (đ)</label>
-        <input type="number" id="f-saved"
-               value="${isEdit ? g.saved : 0}"
-               min="0"
-               oninput="updatePreview()"/>
-        <div class="field-hint">Để trống nếu bắt đầu từ 0</div>
+        <input
+          type="number"
+          id="f-saved"
+          value="${isEdit ? g.saved : 0}"
+          min="0"
+          ${isEdit ? 'disabled' : ''}
+        />
+
+        ${isEdit ? `
+          <div class="field-hint">
+             Số tiền đã tiết kiệm được cập nhật từ lịch sử giao dịch. Để tăng số dư, hãy sử dụng chức năng Nạp tiền.
+          </div>
+        ` : `
+          <div class="field-hint">
+            Nhập số tiền tiết kiệm ban đầu (nếu có).
+          </div>
+        `}
       </div>
     </div>
 
@@ -385,6 +397,7 @@ function formatVNDate(dateStr) {
   return `${day}/${month}/${year}`;
 }
 
+
 async function saveGoal(id) {
 
   const name =
@@ -393,36 +406,57 @@ async function saveGoal(id) {
   const target_amount =
     parseInt(document.getElementById('f-target').value) || 0;
 
-  const saved_amount =
-    parseInt(document.getElementById('f-saved').value) || 0;
-
   const start_date =
     document.getElementById('f-created').value;
 
   const deadline =
     document.getElementById('f-deadline').value || null;
 
-  if (!name || !target_amount) return;
+  if (!name || !target_amount) {
+    alert("Vui lòng nhập tên và số tiền mục tiêu");
+    return;
+  }
 
-  const token = localStorage.getItem("token");
+  const isEdit = id !== -1;
+
+  let saved_amount = 0;
+
+  // Chỉ lấy saved_amount khi tạo mới
+  if (!isEdit) {
+    saved_amount =
+      parseInt(document.getElementById('f-saved')?.value) || 0;
+  }
 
   const data = {
     name,
     target_amount,
-    saved_amount,
     color_index: selectedCI,
     start_date,
     deadline
   };
 
+  // Chỉ gửi saved_amount khi tạo mới
+  if (!isEdit) {
+    data.saved_amount = saved_amount;
+  }
+
   try {
 
-    const token = localStorage.getItem("token");
+    const token =
+      localStorage.getItem("token");
+
+    const url = isEdit
+      ? `http://localhost:3000/api/goals/${id}`
+      : "http://localhost:3000/api/goals";
+
+    const method = isEdit
+      ? "PUT"
+      : "POST";
 
     const res = await fetch(
-      "http://localhost:3000/api/goals",
+      url,
       {
-        method: "POST",
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
@@ -433,6 +467,12 @@ async function saveGoal(id) {
 
     const result = await res.json();
 
+    if (!res.ok) {
+      throw new Error(
+        result.message || "Có lỗi xảy ra"
+      );
+    }
+
     console.log(result);
 
     closeModal();
@@ -441,7 +481,10 @@ async function saveGoal(id) {
 
   } catch (err) {
 
-    console.log(err);
+    console.error(err);
+
+    alert(err.message);
+
   }
 }
 //  FORM: NẠP TIỀN

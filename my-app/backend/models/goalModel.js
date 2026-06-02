@@ -70,7 +70,6 @@ export async function updateGoal(id, userId, data) {
     const {
         name,
         target_amount,
-        saved_amount,
         color_index,
         start_date,
         deadline
@@ -81,15 +80,14 @@ export async function updateGoal(id, userId, data) {
          SET
             name = ?,
             target_amount = ?,
-            saved_amount = ?,
             color_index = ?,
             start_date = ?,
             deadline = ?
-         WHERE id = ? AND user_id = ?`,
+         WHERE id = ?
+         AND user_id = ?`,
         [
             name,
             target_amount,
-            saved_amount,
             color_index,
             start_date,
             deadline,
