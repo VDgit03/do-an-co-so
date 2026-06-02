@@ -51,30 +51,6 @@ export const createAITransaction = async (data) => {
             }
         }
 
-        // saving => tìm goal
-        if (type === "saving" && goal_name) {
-
-            const [goals] =
-                await conn.query(
-                    `
-                    SELECT id
-                    FROM goals
-                    WHERE user_id = ?
-                    AND LOWER(name) = LOWER(?)
-                    LIMIT 1
-                    `,
-                    [user_id, goal_name]
-                );
-
-            if (goals.length === 0) {
-                throw new Error(
-                    `Không tìm thấy mục tiêu "${goal_name}"`
-                );
-            }
-
-            goal_id = goals[0].id;
-        }
-
         // insert transaction
         const [result] = await conn.query(
             `
@@ -100,53 +76,6 @@ export const createAITransaction = async (data) => {
             ]
         );
 
-        // saving => cập nhật goal
-        if (type === "saving" && goal_id) {
-
-            await conn.query(
-                `
-                UPDATE goals
-                SET saved_amount =
-                    saved_amount + ?
-                WHERE id = ?
-                `,
-                [
-                    amount,
-                    goal_id
-                ]
-            );
-
-            // kiểm tra hoàn thành
-            const [goalRows] =
-                await conn.query(
-                    `
-                    SELECT
-                        saved_amount,
-                        target_amount
-                    FROM goals
-                    WHERE id = ?
-                    `,
-                    [goal_id]
-                );
-
-            const goal = goalRows[0];
-
-            if (
-                goal.saved_amount >=
-                goal.target_amount
-            ) {
-
-                await conn.query(
-                    `
-                    UPDATE goals
-                    SET status='completed'
-                    WHERE id = ?
-                    `,
-                    [goal_id]
-                );
-            }
-        }
-
         await conn.commit();
 
         return {
@@ -163,4 +92,121 @@ export const createAITransaction = async (data) => {
         conn.release();
 
     }
+};
+
+async function chat(system, messages) {
+    const conversation = messages
+        .map(m => {
+            const role =
+                m.role === "assistant"
+                    ? "AI"
+                    : "User";
+
+            return `${role}: ${m.content}`;
+        })
+        .join("\n");
+
+    const prompt = `
+${system}
+
+${conversation}
+`;
+
+    return await generateWithRetry(
+        prompt
+    );
+}
+
+export const deleteAITransaction = async (
+    user_id,
+    keyword
+) => {
+
+    const [result] =
+        await db.query(
+            `
+            DELETE FROM transaction
+            WHERE user_id = ?
+            AND title LIKE ?
+            LIMIT 1
+            `,
+            [
+                user_id,
+                `%${keyword}%`
+            ]
+        );
+
+    return result.affectedRows;
+};
+
+export const getBalance = async (user_id) => {
+
+    const [rows] =
+        await db.query(
+            `
+            SELECT
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN type = 'income'
+                            THEN amount
+                            ELSE 0
+                        END
+                    ), 0
+                ) income,
+
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN type = 'expense'
+                            THEN amount
+                            ELSE 0
+                        END
+                    ), 0
+                ) expense
+            FROM transaction
+            WHERE user_id = ?
+            `,
+            [user_id]
+        );
+
+    const data = rows[0];
+
+    return {
+        income: data.income,
+        expense: data.expense,
+        balance:
+            data.income -
+            data.expense
+    };
+};
+
+export const getHighestCategory = async (
+    user_id
+) => {
+
+    const [rows] =
+        await db.query(
+            `
+            SELECT
+                c.name,
+                SUM(t.amount) total
+            FROM transaction t
+            JOIN categories c
+                ON c.id = t.category_id
+            WHERE
+                t.user_id = ?
+                AND t.type = 'expense'
+            GROUP BY c.id, c.name
+            ORDER BY total DESC
+            LIMIT 1
+            `,
+            [user_id]
+        );
+
+    if (rows.length === 0) {
+        return null;
+    }
+
+    return rows[0];
 };

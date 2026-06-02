@@ -1,22 +1,21 @@
-import { createGoal } from "../models/goalModel.js";
+import {
+    createAITransaction,
+    deleteAITransaction,
+    getBalance,
+    getHighestCategory
+} from "../services/AITransactionService.js";
+export const executeAIAction = async (req, res) => {
 
-import { createAITransaction } from "../services/AITransactionService.js";
+    try {
 
-export const executeAIAction =
-    async (req, res) => {
+        const action =
+            req.body.action;
 
-        try {
+        const user_id =
+            req.user.id;
 
-            const action =
-                req.body.action;
-
-            const user_id =
-                req.user.id;
-
-            if (
-                action.action ===
-                "create_transaction"
-            ) {
+        switch (action.action) {
+            case "create_transaction":
 
                 const result =
                     await createAITransaction({
@@ -32,49 +31,65 @@ export const executeAIAction =
                     type: "transaction",
                     id: result.id
                 });
-            }
+                break;
+            case "delete_transaction":
 
-            if (
-                action.action ===
-                "create_goal"
-            ) {
-
-                const id =
-                    await createGoal({
+                const deleted =
+                    await deleteAITransaction(
                         user_id,
-                        wallet_id: null,
-                        name: action.name,
-                        target_amount:
-                            action.target_amount,
-                        saved_amount: 0,
-                        color_index: 0,
-                        start_date: null,
-                        deadline: null
-                    });
+                        action.keyword
+                    );
 
                 return res.json({
                     success: true,
-                    type: "goal",
-                    id
+                    type: "delete_transaction",
+                    deleted
                 });
-            }
+                break;
 
-            if (
-                action.action === "saving"
-            ) {
+            case "get_balance":
+
+                const balance =
+                    await getBalance(
+                        user_id
+                    );
 
                 return res.json({
-                    success: false,
-                    message: "saving chưa xử lý"
+                    success: true,
+                    type: "balance",
+                    data: balance
                 });
-            }
+                break;
 
-        } catch (err) {
+            case "highest_category":
 
-            res.status(500).json({
-                success: false,
-                message: err.message
-            });
+                const category =
+                    await getHighestCategory(
+                        user_id
+                    );
 
+                return res.json({
+                    success: true,
+                    type: "highest_category",
+                    data: category
+                });
+                break;
+
+            default:
+
+                return res.status(400).json({
+                    success: false,
+                    message: "Action không hỗ trợ"
+                });
         }
-    };
+
+    } catch (err) {
+
+        res.status(500).json({
+            success: false,
+            message: err.message
+        });
+
+    }
+};
+

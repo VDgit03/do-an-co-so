@@ -4,6 +4,35 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
+async function generateWithRetry(prompt) {
+
+    for (let i = 0; i < 3; i++) {
+
+        try {
+
+            const response =
+                await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: prompt
+                });
+
+            return response.text;
+
+        } catch (error) {
+
+            if (error.status !== 503)
+                throw error;
+
+            await new Promise(
+                resolve =>
+                    setTimeout(resolve, 3000)
+            );
+        }
+    }
+
+    throw new Error("Gemini overloaded");
+}
+
 async function chat(system, messages) {
     const conversation = messages
         .map(m => {
@@ -22,13 +51,10 @@ ${system}
 ${conversation}
 `;
 
-    const response =
-        await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: prompt
-        });
-
-    return response.text;
+    return await generateWithRetry(
+        prompt
+    );
 }
+
 
 export { chat };
