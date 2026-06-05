@@ -353,18 +353,28 @@ KHÔNG sử dụng:
 XÓA GIAO DỊCH
 =============
 
-Nếu người dùng muốn xóa giao dịch:
+Khi người dùng muốn xóa giao dịch:
 
 [ACTION]
 {
-"action":"delete_transaction",
-"keyword":"Ăn sáng"
+  "action":"delete_transaction",
+  "keyword":"từ khóa giao dịch"
 }
 [/ACTION]
 
 Ví dụ:
 
-"Xóa giao dịch ăn sáng"
+Người dùng:
+xóa giao dịch ăn haidilao
+
+Trả về:
+
+[ACTION]
+{
+  "action":"delete_transaction",
+  "keyword":"haidilao"
+}
+[/ACTION]
 
 ========================
 XEM SỐ DƯ
@@ -446,39 +456,15 @@ QUY TẮC QUAN TRỌNG
 
 /* ── PARSE AI RESPONSE ── */
 function parseAndRender(reply, userText) {
+
     const actionMatch =
         reply.match(
             /\[ACTION\]([\s\S]*?)\[\/ACTION\]/
         );
 
+    // Không có ACTION -> chat bình thường
     if (!actionMatch) {
-        addBotMessage(reply);
-        return;
-    }
 
-    const action =
-        JSON.parse(
-            actionMatch[1].trim()
-        );
-
-    if (actionMatch) {
-        try {
-            const action = JSON.parse(actionMatch[1].trim());
-            const cleanReply = reply.replace(/\[ACTION\][\s\S]*?\[\/ACTION\]/, '').trim();
-
-            // Save draft
-            state.draft = { ...action, confirmed: false };
-            saveState();
-            updatePendingDot(true);
-            checkDraft();
-
-            addBotMessage(cleanReply || 'Tôi đã phân tích giao dịch của bạn:', action);
-
-
-        } catch (e) {
-            addBotMessage(reply);
-        }
-    } else {
         addBotMessage(reply);
 
         const lower = reply.toLowerCase();
@@ -487,12 +473,16 @@ function parseAndRender(reply, userText) {
             lower.includes("tiết kiệm") ||
             lower.includes("mục tiêu")
         ) {
+
             showChips([
                 "Mở mục Tiết kiệm",
                 "Xem mục tiêu hiện có"
             ]);
 
-        } else if (lower.includes("danh mục")) {
+        } else if (
+            lower.includes("danh mục")
+        ) {
+
             showChips([
                 "Ăn uống",
                 "Di chuyển",
@@ -500,63 +490,148 @@ function parseAndRender(reply, userText) {
             ]);
 
         } else {
+
             showChips([
                 "Thêm giao dịch khác",
                 "Xem báo cáo tháng",
                 "Xem chi tiêu gần đây"
             ]);
+
         }
-    }
-}
 
-/* ── CONFIRM / EDIT TXN ── */
-async function confirmTxn() {
-    if (!state.draft) return;
-
-    const t = state.draft;
-
-    const token = localStorage.getItem("token");
-    const user_id = localStorage.getItem("user_id");
-
-    console.log("TOKEN:", token);
-    console.log("USER_ID:", user_id);
-    console.log("DRAFT:", t);
-
-    if (!token && !user_id) {
-        addBotMessage("❌ Bạn chưa đăng nhập");
         return;
     }
 
     try {
 
-        const res = await fetch(
-            "http://localhost:3000/api/ai/execute",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token && {
-                        Authorization: `Bearer ${token}`
-                    })
-                },
-                body: JSON.stringify({
-                    user_id: user_id ? Number(user_id) : null,
-                    action: t
-                })
-            }
+        const action =
+            JSON.parse(
+                actionMatch[1].trim()
+            );
+
+        const cleanReply =
+            reply.replace(
+                /\[ACTION\][\s\S]*?\[\/ACTION\]/,
+                ""
+            ).trim();
+
+        // Chỉ transaction mới hiện form xác nhận
+        if (
+            action.action ===
+            "create_transaction"
+        ) {
+
+            state.draft = {
+                ...action,
+                confirmed: false
+            };
+
+            saveState();
+            updatePendingDot(true);
+            checkDraft();
+
+            addBotMessage(
+                cleanReply ||
+                "Tôi đã phân tích giao dịch của bạn:",
+                action
+            );
+
+            return;
+        }
+
+        // Các action khác chạy luôn
+        executeAction(action);
+
+    } catch (err) {
+
+        console.error(
+            "Parse ACTION error:",
+            err
         );
 
-        const data = await res.json();
+        addBotMessage(
+            "Không thể xử lý yêu cầu."
+        );
+    }
+}
+/* ── CONFIRM / EDIT TXN ── */
+async function confirmTxn() {
 
-        console.log("EXECUTE RESULT:", data);
+    if (!state.draft) return;
+
+    const t = state.draft;
+
+    const token =
+        localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+    console.log("DRAFT:", t);
+
+    if (!token) {
+
+        addBotMessage(
+            "❌ Bạn chưa đăng nhập"
+        );
+
+        return;
+    }
+
+    try {
+
+        const res =
+            await fetch(
+                "http://localhost:3000/api/ai/execute",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        Authorization:
+                            `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action: t
+                    })
+                }
+            );
+
+        const data =
+            await res.json();
+
+        console.log(
+            "EXECUTE RESULT:",
+            data
+        );
+
+        if (
+            data.message ===
+            "jwt expired"
+        ) {
+
+            localStorage.removeItem(
+                "token"
+            );
+
+            addBotMessage(
+                "🔒 Phiên đăng nhập đã hết hạn."
+            );
+
+            return;
+        }
 
         if (!data.success) {
-            throw new Error(data.message);
+
+            throw new Error(
+                data.message
+            );
+
         }
 
         state.transactions.unshift({
             ...t,
-            id: data.id || Date.now()
+            id:
+                data.id ||
+                Date.now()
         });
 
         state.draft = null;
@@ -567,22 +642,166 @@ async function confirmTxn() {
 
         checkDraft();
 
-        addBotMessage("✅ Đã lưu thành công");
+        addBotMessage(
+            "✅ Đã lưu thành công"
+        );
 
     } catch (err) {
 
         console.error(err);
 
         addBotMessage(
-            `❌ ${err.message || "Lỗi lưu giao dịch"}`
+            `❌ ${err.message ||
+            "Lỗi lưu giao dịch"
+            }`
         );
+
     }
-    if (t.action === "create_goal") {
+}
+async function executeAction(action) {
 
-        window.location.href =
-            `/goals?id=${data.id}`;
+    try {
 
-        return;
+        const token =
+            localStorage.getItem(
+                "token"
+            );
+
+        if (!token) {
+
+            addBotMessage(
+                "❌ Bạn chưa đăng nhập"
+            );
+
+            return;
+        }
+
+        const res =
+            await fetch(
+                "http://localhost:3000/api/ai/execute",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                        Authorization:
+                            `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        action
+                    })
+                }
+            );
+
+        const data =
+            await res.json();
+
+        console.log(
+            "AI ACTION:",
+            data
+        );
+
+        if (
+            data.message ===
+            "jwt expired"
+        ) {
+
+            localStorage.removeItem(
+                "token"
+            );
+
+            addBotMessage(
+                "🔒 Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+            );
+
+            return;
+        }
+
+        if (!data.success) {
+
+            addBotMessage(
+                data.message ||
+                "Có lỗi xảy ra"
+            );
+
+            return;
+        }
+
+        switch (data.type) {
+
+            case "balance":
+
+                addBotMessage(
+                    `💰 Số dư hiện tại
+
+Thu nhập:
+${formatMoney(
+                        data.data.income
+                    )}
+
+Chi tiêu:
+${formatMoney(
+                        data.data.expense
+                    )}
+
+Còn lại:
+${formatMoney(
+                        data.data.balance
+                    )}`
+                );
+
+                break;
+
+            case "highest_category":
+
+                if (!data.data) {
+
+                    addBotMessage(
+                        "📊 Chưa có dữ liệu chi tiêu."
+                    );
+
+                    break;
+                }
+
+                addBotMessage(
+                    `📊 Danh mục chi nhiều nhất
+
+${data.data.name}
+
+Tổng:
+${formatMoney(
+                        data.data.total
+                    )}`
+                );
+
+                break;
+
+            case "delete_transaction":
+
+                addBotMessage(
+                    data.deleted > 0
+                        ? "🗑️ Đã xóa giao dịch."
+                        : "Không tìm thấy giao dịch."
+                );
+
+                break;
+
+            default:
+
+                console.log(
+                    "Unknown action result:",
+                    data
+                );
+        }
+
+    } catch (err) {
+
+        console.error(err);
+
+        addBotMessage(
+            "❌ Không thể kết nối máy chủ."
+        );
+
     }
 }
 

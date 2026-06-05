@@ -22,6 +22,11 @@ export const createAITransaction = async (data) => {
         throw new Error("Số tiền không hợp lệ");
     }
 
+    if (!title) {
+        throw new Error("Giao dịch chưa đặt tên");
+
+    }
+
     const conn = await db.getConnection();
 
     try {
@@ -37,18 +42,31 @@ export const createAITransaction = async (data) => {
             const [categories] =
                 await conn.query(
                     `
-                    SELECT id
-                    FROM categories
-                    WHERE user_id = ?
-                    AND LOWER(name) = LOWER(?)
-                    LIMIT 1
-                    `,
+            SELECT id
+            FROM categories
+            WHERE user_id = ?
+            AND TRIM(LOWER(name))
+                =
+                TRIM(LOWER(?))
+            LIMIT 1
+            `,
                     [user_id, category]
                 );
 
             if (categories.length > 0) {
-                category_id = categories[0].id;
+
+                category_id =
+                    categories[0].id;
+
             }
+        }
+
+        if (!category_id) {
+
+            throw new Error(
+                `Không tìm thấy danh mục ${category}`
+            );
+
         }
 
         // insert transaction
@@ -94,46 +112,39 @@ export const createAITransaction = async (data) => {
     }
 };
 
-async function chat(system, messages) {
-    const conversation = messages
-        .map(m => {
-            const role =
-                m.role === "assistant"
-                    ? "AI"
-                    : "User";
+export const deleteAITransaction = async (user_id, keyword) => {
 
-            return `${role}: ${m.content}`;
-        })
-        .join("\n");
-
-    const prompt = `
-${system}
-
-${conversation}
-`;
-
-    return await generateWithRetry(
-        prompt
-    );
-}
-
-export const deleteAITransaction = async (
-    user_id,
-    keyword
-) => {
-
-    const [result] =
+    const [rows] =
         await db.query(
             `
-            DELETE FROM transaction
+            SELECT id
+            FROM transaction
             WHERE user_id = ?
-            AND title LIKE ?
+            AND LOWER(title)
+                LIKE LOWER(?)
+            ORDER BY transaction_date DESC
             LIMIT 1
             `,
             [
                 user_id,
                 `%${keyword}%`
             ]
+        );
+
+    if (rows.length === 0) {
+        return 0;
+    }
+
+    const transactionId =
+        rows[0].id;
+
+    const [result] =
+        await db.query(
+            `
+            DELETE FROM transaction
+            WHERE id = ?
+            `,
+            [transactionId]
         );
 
     return result.affectedRows;
@@ -166,6 +177,11 @@ export const getBalance = async (user_id) => {
                 ) expense
             FROM transaction
             WHERE user_id = ?
+            AND MONTH(transaction_date)
+                = MONTH(CURDATE())
+
+            AND YEAR(transaction_date)
+                = YEAR(CURDATE())
             `,
             [user_id]
         );

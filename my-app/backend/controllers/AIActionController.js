@@ -31,7 +31,6 @@ export const executeAIAction = async (req, res) => {
                     type: "transaction",
                     id: result.id
                 });
-                break;
             case "delete_transaction":
 
                 const deleted =
@@ -45,7 +44,6 @@ export const executeAIAction = async (req, res) => {
                     type: "delete_transaction",
                     deleted
                 });
-                break;
 
             case "get_balance":
 
@@ -59,7 +57,6 @@ export const executeAIAction = async (req, res) => {
                     type: "balance",
                     data: balance
                 });
-                break;
 
             case "highest_category":
 
@@ -71,9 +68,11 @@ export const executeAIAction = async (req, res) => {
                 return res.json({
                     success: true,
                     type: "highest_category",
-                    data: category
+                    data: category || {
+                        name: "Chưa có dữ liệu",
+                        total: 0
+                    }
                 });
-                break;
 
             default:
 
